@@ -4,5 +4,12 @@ Contract in ``base.py``; the object-store-backed implementation in ``store.py``.
 """
 
 from .base import DatasetVersion, LineageRecord, ModelVersion, RegistryStore
+from .store import ObjectStoreRegistry
 
-__all__ = ["DatasetVersion", "ModelVersion", "LineageRecord", "RegistryStore"]
+__all__ = [
+    "DatasetVersion",
+    "ModelVersion",
+    "LineageRecord",
+    "RegistryStore",
+    "ObjectStoreRegistry",
+]
