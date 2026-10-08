@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+# Project state (never commit workspace data / keys / audit)
+.gadziriro/
+*.db
+*.sqlite3
+.secret-key
+# Node / frontend
+node_modules/
+frontend/dist/
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.log

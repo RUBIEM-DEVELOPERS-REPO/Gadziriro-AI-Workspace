@@ -1,0 +1,17 @@
+# Dev compose (CPU-only smoke). Real GPU + gVisor isolation is target-only.
+# On the Linux+NVIDIA target, add the nvidia runtime and gVisor (runsc) per deploy/README.
+services:
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    environment:
+      GADZIRIRO_RUNTIME_BACKEND: mock   # flip to "docker" on target
+      GADZIRIRO_ALLOW_EGRESS: "false"   # FR-20: no egress by default
+      GADZIRIRO_TELEMETRY_ENABLED: "false"
+    ports:
+      - "127.0.0.1:8080:8080"           # loopback only
+    volumes:
+      - gadziriro-data:/var/lib/gadziriro
+volumes:
+  gadziriro-data:
