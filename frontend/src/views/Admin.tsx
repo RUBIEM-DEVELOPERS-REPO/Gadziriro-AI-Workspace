@@ -4,6 +4,7 @@ import {
   ApiError,
   type AuditVerifyOut,
   type HardwareReport,
+  type MfaEnrollOut,
 } from '../api/client.ts'
 
 export default function Admin() {
@@ -15,6 +16,42 @@ export default function Admin() {
   const [auditForbidden, setAuditForbidden] = useState(false)
 
   const [loading, setLoading] = useState(true)
+
+  // MFA enrolment state (Security).
+  const [mfa, setMfa] = useState<MfaEnrollOut | null>(null)
+  const [mfaBusy, setMfaBusy] = useState(false)
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaVerified, setMfaVerified] = useState<boolean | null>(null)
+  const [mfaError, setMfaError] = useState<string | null>(null)
+
+  async function handleEnroll() {
+    setMfaBusy(true)
+    setMfaError(null)
+    setMfaVerified(null)
+    try {
+      const out = await api.mfaEnroll()
+      setMfa(out)
+    } catch (err) {
+      setMfaError(err instanceof ApiError ? err.message : 'MFA enrolment failed.')
+    } finally {
+      setMfaBusy(false)
+    }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault()
+    if (!mfaCode.trim()) return
+    setMfaBusy(true)
+    setMfaError(null)
+    try {
+      const out = await api.mfaVerify(mfaCode.trim())
+      setMfaVerified(out.ok)
+    } catch (err) {
+      setMfaError(err instanceof ApiError ? err.message : 'MFA verification failed.')
+    } finally {
+      setMfaBusy(false)
+    }
+  }
 
   useEffect(() => {
     let active = true
@@ -155,6 +192,67 @@ export default function Admin() {
             ) : null}
             {audit.detail ? <p className="muted">{audit.detail}</p> : null}
           </div>
+        ) : null}
+      </div>
+
+      <div className="panel">
+        <h2>Security — MFA enrolment</h2>
+        <p className="muted">
+          Enrol an authenticator app, then verify a one-time code to confirm it.
+        </p>
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={handleEnroll}
+          disabled={mfaBusy}
+        >
+          {mfaBusy && !mfa ? 'Enrolling…' : 'Enroll in MFA'}
+        </button>
+
+        {mfa ? (
+          <div className="mfa-details">
+            <div className="field">
+              <label htmlFor="mfa-uri">Provisioning URI</label>
+              <input id="mfa-uri" type="text" value={mfa.provisioning_uri} readOnly />
+            </div>
+            <div className="field">
+              <label htmlFor="mfa-secret">Secret</label>
+              <input id="mfa-secret" type="text" value={mfa.secret} readOnly />
+            </div>
+            <form className="create-form" onSubmit={handleVerify}>
+              <div className="field">
+                <label htmlFor="mfa-code">One-time code</label>
+                <input
+                  id="mfa-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  placeholder="e.g. 123456"
+                  required
+                />
+              </div>
+              <button type="submit" className="btn-primary" disabled={mfaBusy}>
+                {mfaBusy ? 'Verifying…' : 'Verify code'}
+              </button>
+            </form>
+            {mfaVerified === null ? null : mfaVerified ? (
+              <p>
+                <span className="badge badge-ok">verified</span>
+              </p>
+            ) : (
+              <p>
+                <span className="badge badge-broken">invalid code</span>
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        {mfaError ? (
+          <p className="error" role="alert">
+            {mfaError}
+          </p>
         ) : null}
       </div>
     </section>

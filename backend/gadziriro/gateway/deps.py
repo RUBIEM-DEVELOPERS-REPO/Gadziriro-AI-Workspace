@@ -91,6 +91,25 @@ def require_role(role: Role) -> Callable[[Request], Principal]:
     return _dependency
 
 
+def require_any_role(*roles: Role) -> Callable[[Request], Principal]:
+    """Build a dependency that requires *any* of ``roles`` on the principal.
+
+    Useful for routes open to more than one role (e.g. governance routes that
+    both ``COMPLIANCE`` and ``ADMIN`` may reach).
+
+    :raises PolicyDenied: if the principal holds none of ``roles``.
+    """
+
+    def _dependency(request: Request) -> Principal:
+        principal = get_current_principal(request)
+        if not any(principal.has_role(role) for role in roles):
+            wanted = ", ".join(role.value for role in roles)
+            raise PolicyDenied(f"requires one of role: {wanted}")
+        return principal
+
+    return _dependency
+
+
 def get_user_store(request: Request) -> SqlUserStore:
     """Return the user store wired onto ``app.state``."""
     return request.app.state.user_store
@@ -104,3 +123,43 @@ def get_session_manager(request: Request) -> SessionManager:
 def get_audit(request: Request) -> AuditSink:
     """Return the audit sink wired onto ``app.state``."""
     return request.app.state.audit
+
+
+def get_object_store(request: Request) -> Any:
+    """Return the shared Phase 1 object store wired onto ``app.state``."""
+    return request.app.state.object_store
+
+
+def get_registry(request: Request) -> Any:
+    """Return the dataset/model registry wired onto ``app.state``."""
+    return request.app.state.registry
+
+
+def get_tracker(request: Request) -> Any:
+    """Return the experiment tracker wired onto ``app.state``."""
+    return request.app.state.tracker
+
+
+def get_scheduler(request: Request) -> Any:
+    """Return the job scheduler wired onto ``app.state``."""
+    return request.app.state.scheduler
+
+
+def get_mirror(request: Request) -> Any:
+    """Return the package/model mirror wired onto ``app.state``."""
+    return request.app.state.mirror
+
+
+def get_backup_service(request: Request) -> Any:
+    """Return the backup service wired onto ``app.state``."""
+    return request.app.state.backup
+
+
+def get_metrics(request: Request) -> Any:
+    """Return the metrics registry wired onto ``app.state``."""
+    return request.app.state.metrics
+
+
+def get_export_policy(request: Request) -> Any:
+    """Return the export-approval policy wired onto ``app.state``."""
+    return request.app.state.export_policy
