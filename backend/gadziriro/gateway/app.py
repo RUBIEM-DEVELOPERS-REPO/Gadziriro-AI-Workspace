@@ -26,6 +26,7 @@ from ..auth.store import SqlUserStore
 from ..core.config import Settings, load_settings
 from ..core.errors import AuthError, GadziriroError, NotFound, PolicyDenied
 from ..core.objectstore import LocalObjectStore, ObjectStore
+from ..incident.response import IncidentService
 from ..licence.key import LicenceError
 from ..mirror.store import ObjectStoreMirror
 from ..observability.metrics import MetricsRegistry
@@ -76,6 +77,7 @@ def create_app(
     backup: Optional[BackupService] = None,
     metrics: Optional[MetricsRegistry] = None,
     export_policy: Optional[ExportPolicy] = None,
+    incident_service: Optional[IncidentService] = None,
 ) -> FastAPI:
     """Build the gateway application.
 
@@ -111,6 +113,8 @@ def create_app(
     )
     metrics = metrics or MetricsRegistry()
     export_policy = export_policy or ExportPolicy(audit=audit)
+    # Phase 2: a single in-memory incident-response service shared across requests.
+    incident_service = incident_service or IncidentService(audit=audit)
 
     app = FastAPI(title="Gadziriro AI Workspace", version="0.1.0")
     app.state.settings = settings
@@ -125,6 +129,7 @@ def create_app(
     app.state.backup = backup
     app.state.metrics = metrics
     app.state.export_policy = export_policy
+    app.state.incident_service = incident_service
 
     app.add_middleware(
         CORSMiddleware,

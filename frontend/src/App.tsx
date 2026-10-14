@@ -8,13 +8,23 @@ import Jobs from './views/Jobs.tsx'
 import Governance from './views/Governance.tsx'
 import Ops from './views/Ops.tsx'
 import Exports from './views/Exports.tsx'
+import ModelStudio from './views/ModelStudio.tsx'
+import Evaluate from './views/Evaluate.tsx'
+import WeightTools from './views/WeightTools.tsx'
+import ModelCard from './views/ModelCard.tsx'
+import Compliance from './views/Compliance.tsx'
 
 type Tab =
   | 'workspace'
   | 'registry'
+  | 'modelstudio'
+  | 'evaluate'
+  | 'weighttools'
+  | 'modelcard'
   | 'jobs'
   | 'exports'
   | 'governance'
+  | 'compliance'
   | 'ops'
   | 'admin'
 
@@ -73,16 +83,23 @@ export default function App() {
 
   const isAdmin = principal.roles.includes('admin')
   const isCompliance = principal.roles.includes('compliance')
+  const isDataScientist = principal.roles.includes('data_scientist')
   const canGovern = isAdmin || isCompliance
+  const canWeightTools = isAdmin || isDataScientist
 
   // Tabs available to this principal, in display order. Role-gated tabs are
   // omitted entirely (not just disabled) when the role is absent.
   const tabs: { id: Tab; label: string; visible: boolean }[] = [
     { id: 'workspace', label: 'Workspace', visible: true },
     { id: 'registry', label: 'Registry', visible: true },
+    { id: 'modelstudio', label: 'Model Studio', visible: true },
+    { id: 'evaluate', label: 'Evaluate', visible: true },
+    { id: 'weighttools', label: 'Weight Tools', visible: canWeightTools },
+    { id: 'modelcard', label: 'Model Card', visible: true },
     { id: 'jobs', label: 'Jobs', visible: true },
     { id: 'exports', label: 'Exports', visible: true },
     { id: 'governance', label: 'Governance', visible: canGovern },
+    { id: 'compliance', label: 'Compliance', visible: canGovern },
     { id: 'ops', label: 'Ops', visible: isAdmin },
     { id: 'admin', label: 'Admin', visible: true },
   ]
@@ -125,12 +142,22 @@ export default function App() {
           <Workspace />
         ) : tab === 'registry' ? (
           <Registry />
+        ) : tab === 'modelstudio' ? (
+          <ModelStudio />
+        ) : tab === 'evaluate' ? (
+          <Evaluate />
+        ) : tab === 'weighttools' && canWeightTools ? (
+          <WeightTools />
+        ) : tab === 'modelcard' ? (
+          <ModelCard />
         ) : tab === 'jobs' ? (
           <Jobs />
         ) : tab === 'exports' ? (
           <Exports isAdmin={isAdmin} />
         ) : tab === 'governance' && canGovern ? (
           <Governance />
+        ) : tab === 'compliance' && canGovern ? (
+          <Compliance />
         ) : tab === 'ops' && isAdmin ? (
           <Ops />
         ) : tab === 'admin' ? (

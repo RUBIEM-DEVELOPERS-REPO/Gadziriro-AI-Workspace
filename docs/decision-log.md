@@ -14,3 +14,4 @@ Chronological record of decisions (section 13 governance). ADRs hold the detail.
 | TODO | Vendor SOC 2 timing | Open (Phase 3) | BRD §14 |
 | TODO | Plug-in sandboxing/signing | Open (Phase 4) | BRD §14 |
 | 2026-10-14 | Phase 1 pilot foundations delivered (registry/lineage, SSO/MFA/RBAC, scheduler/quotas, mirror, backup/restore, observability, governance, export approval) | Done | PR (stacked on Phase 0) |
+| 2026-10-14 | Phase 2 Model Studio delivered (fine-tune/eval/diff/weight-tools/export, model cards, licence+export checks, policy packs, incident response, DSAR export/erase, support bundles, API/CLI+UI) | Done | PR stacked |
