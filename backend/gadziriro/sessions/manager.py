@@ -15,8 +15,9 @@ skipped so the manager never hard-depends on the audit implementation.
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Callable, Optional
 
 from ..audit.base import AuditEvent, AuditSink
 from ..core.errors import NotFound, RuntimeAdapterError
@@ -34,6 +35,9 @@ class _SessionRecord:
     status: str
     gpu_ids: list[int] = field(default_factory=list)
     allow_egress: bool = False
+    # Wall-clock of the last activity on this session (create / run_cell). Used by
+    # the idle GPU reclaimer (FR-04) to find sessions that have gone quiet.
+    last_active: float = 0.0
 
     def to_out(self) -> SessionOut:
         """Project this record onto the shared API schema."""
@@ -54,10 +58,16 @@ class SessionManager:
         adapter: RuntimeAdapter,
         *,
         audit: Optional[AuditSink] = None,
+        now: Callable[[], float] = time.time,
     ) -> None:
-        """Wire the manager to a runtime adapter and an optional audit sink."""
+        """Wire the manager to a runtime adapter and an optional audit sink.
+
+        ``now`` is an injectable monotonic-ish clock (defaults to ``time.time``)
+        so idle tracking can be driven by a fake clock in tests (FR-04).
+        """
         self._adapter = adapter
         self._audit = audit
+        self._now = now
         self._sessions: dict[str, _SessionRecord] = {}
 
     # -- lifecycle -------------------------------------------------------
@@ -105,6 +115,7 @@ class SessionManager:
             status="running",
             gpu_ids=list(gpu.gpu_ids) if gpu else [],
             allow_egress=allow_egress,
+            last_active=self._now(),
         )
         self._sessions[session_id] = record
 
@@ -162,7 +173,37 @@ class SessionManager:
             raise RuntimeAdapterError(
                 "runtime backend does not support interactive execute"
             )
-        return execute(record.kernel_id, code)
+        result = execute(record.kernel_id, code)
+        # Running a cell counts as activity, so the idle reclaimer leaves it alone.
+        record.last_active = self._now()
+        return result
+
+    # -- idle tracking (FR-04) ------------------------------------------
+
+    def last_active(self, session_id: str) -> float:
+        """Return the timestamp of the session's last activity.
+
+        :raises NotFound: if the session does not exist.
+        """
+        return self._require(session_id).last_active
+
+    def idle_sessions(
+        self,
+        timeout_s: float,
+        now: Optional[Callable[[], float]] = None,
+    ) -> list[str]:
+        """Return the ids of sessions idle longer than ``timeout_s``.
+
+        ``now`` optionally overrides the manager's clock (a callable returning a
+        timestamp), which lets a fake clock drive reclaim tests deterministically.
+        """
+        clock = now if now is not None else self._now
+        current = clock()
+        return [
+            sid
+            for sid, rec in self._sessions.items()
+            if current - rec.last_active > timeout_s
+        ]
 
     # -- helpers ---------------------------------------------------------
 

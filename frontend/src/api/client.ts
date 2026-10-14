@@ -39,6 +39,63 @@ export interface RunCellOut {
   [key: string]: unknown
 }
 
+// --- Phase 1 contracts -----------------------------------------------------
+
+export interface DatasetVersion {
+  name: string
+  version: string
+  sensitivity: string
+  source: string
+  subjects: string[]
+  created_at: string
+}
+
+export interface ModelLineage {
+  dataset_refs: string[]
+  code_ref: string
+  params: Record<string, unknown>
+  hardware: string
+  run_id: string
+}
+
+export interface ModelVersion {
+  name: string
+  version: string
+  flagged: boolean
+  sensitivity: string
+  created_at: string
+  lineage: ModelLineage
+}
+
+export interface Job {
+  job_id: string
+  user: string
+  project: string
+  status: string
+  submitted_at: string
+}
+
+export interface Backup {
+  id: string
+  created_at?: string
+  status?: string
+  size_bytes?: number
+}
+
+export interface ExportRequest {
+  id: string
+  status: string
+  resource_ref?: string
+  sensitivity?: string
+  requested_by?: string
+  created_at?: string
+}
+
+export interface MfaEnrollOut {
+  secret: string
+  provisioning_uri: string
+}
+
 export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -76,6 +133,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const text = await res.text()
   if (!text) return undefined as T
   return JSON.parse(text) as T
+}
+
+// Variant for endpoints that return plain text (e.g. Prometheus /metrics).
+async function requestText(path: string, init?: RequestInit): Promise<string> {
+  const res = await fetch(path, {
+    credentials: 'include',
+    ...init,
+  })
+  if (!res.ok) {
+    throw new ApiError(res.status, res.statusText)
+  }
+  return res.text()
 }
 
 export const api = {
@@ -135,5 +204,121 @@ export const api = {
   // Audit
   auditVerify(): Promise<AuditVerifyOut> {
     return request<AuditVerifyOut>('/api/audit/verify')
+  },
+
+  // Registry — datasets & models (FR-06/07/08)
+  listDatasets(): Promise<DatasetVersion[]> {
+    return request<DatasetVersion[]>('/api/datasets')
+  },
+
+  listModels(): Promise<ModelVersion[]> {
+    return request<ModelVersion[]>('/api/models')
+  },
+
+  getModel(name: string, version: string): Promise<ModelVersion> {
+    return request<ModelVersion>(
+      `/api/models/${encodeURIComponent(name)}/${encodeURIComponent(version)}`,
+    )
+  },
+
+  // Jobs (FR-05)
+  listJobs(): Promise<Job[]> {
+    return request<Job[]>('/api/jobs')
+  },
+
+  submitJob(
+    command: string[],
+    project: string,
+    gpuMemoryMb?: number,
+  ): Promise<Job> {
+    const body: { command: string[]; project: string; gpu_memory_mb?: number } = {
+      command,
+      project,
+    }
+    if (gpuMemoryMb !== undefined) body.gpu_memory_mb = gpuMemoryMb
+    return request<Job>('/api/jobs', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  },
+
+  // Metrics (Prometheus text exposition)
+  metrics(): Promise<string> {
+    return requestText('/metrics')
+  },
+
+  // Backups / disaster recovery (FR-28/39)
+  listBackups(): Promise<Backup[]> {
+    return request<Backup[]>('/api/backups')
+  },
+
+  createBackup(): Promise<Backup> {
+    return request<Backup>('/api/backups', { method: 'POST' })
+  },
+
+  testRestore(id: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(
+      `/api/backups/${encodeURIComponent(id)}/test-restore`,
+      { method: 'POST' },
+    )
+  },
+
+  // Governance — retention, DSAR, erasure (FR-22/23)
+  retentionRun(
+    policies: { dataset_name: string; retain_days?: number }[] = [],
+  ): Promise<{ deleted: number; proofs: unknown[] }> {
+    return request<{ deleted: number; proofs: unknown[] }>(
+      '/api/governance/retention/run',
+      { method: 'POST', body: JSON.stringify({ policies }) },
+    )
+  },
+
+  dsar(subject: string): Promise<ModelVersion[]> {
+    return request<ModelVersion[]>(
+      `/api/governance/dsar/${encodeURIComponent(subject)}`,
+    )
+  },
+
+  dsarErase(subject: string): Promise<{ flagged: string[] }> {
+    return request<{ flagged: string[] }>(
+      `/api/governance/dsar/${encodeURIComponent(subject)}/erase`,
+      { method: 'POST' },
+    )
+  },
+
+  // Exports — request / review (FR-21)
+  listExports(): Promise<ExportRequest[]> {
+    return request<ExportRequest[]>('/api/exports')
+  },
+
+  requestExport(resourceRef: string, sensitivity: string): Promise<ExportRequest> {
+    return request<ExportRequest>('/api/exports', {
+      method: 'POST',
+      body: JSON.stringify({ resource_ref: resourceRef, sensitivity }),
+    })
+  },
+
+  approveExport(id: string): Promise<void> {
+    return request<void>(`/api/exports/${encodeURIComponent(id)}/approve`, {
+      method: 'POST',
+    })
+  },
+
+  denyExport(id: string): Promise<void> {
+    return request<void>(`/api/exports/${encodeURIComponent(id)}/deny`, {
+      method: 'POST',
+    })
+  },
+
+  // MFA enrolment
+  mfaEnroll(): Promise<MfaEnrollOut> {
+    return request<MfaEnrollOut>('/api/mfa/enroll', { method: 'POST' })
+  },
+
+  mfaVerify(code: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>('/api/mfa/verify', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    })
   },
 }
