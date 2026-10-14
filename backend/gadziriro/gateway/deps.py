@@ -163,3 +163,13 @@ def get_metrics(request: Request) -> Any:
 def get_export_policy(request: Request) -> Any:
     """Return the export-approval policy wired onto ``app.state``."""
     return request.app.state.export_policy
+
+
+def get_settings(request: Request) -> Any:
+    """Return the runtime settings wired onto ``app.state``."""
+    return request.app.state.settings
+
+
+def get_incident_service(request: Request) -> Any:
+    """Return the Phase 2 incident-response service wired onto ``app.state``."""
+    return request.app.state.incident_service
