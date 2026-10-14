@@ -7,6 +7,32 @@ imports this package and mounts whatever registered.
 
 from __future__ import annotations
 
-from . import audit, auth, installer, sessions
+from . import (
+    audit,
+    auth,
+    backup,
+    exports,
+    governance,
+    installer,
+    jobs,
+    metrics,
+    mfa,
+    mirror,
+    registry,
+    sessions,
+)
 
-__all__ = ["audit", "auth", "installer", "sessions"]
+__all__ = [
+    "audit",
+    "auth",
+    "backup",
+    "exports",
+    "governance",
+    "installer",
+    "jobs",
+    "metrics",
+    "mfa",
+    "mirror",
+    "registry",
+    "sessions",
+]

@@ -3,8 +3,20 @@ import { api, ApiError, type PrincipalOut } from './api/client.ts'
 import Login from './views/Login.tsx'
 import Workspace from './views/Workspace.tsx'
 import Admin from './views/Admin.tsx'
+import Registry from './views/Registry.tsx'
+import Jobs from './views/Jobs.tsx'
+import Governance from './views/Governance.tsx'
+import Ops from './views/Ops.tsx'
+import Exports from './views/Exports.tsx'
 
-type Tab = 'workspace' | 'admin'
+type Tab =
+  | 'workspace'
+  | 'registry'
+  | 'jobs'
+  | 'exports'
+  | 'governance'
+  | 'ops'
+  | 'admin'
 
 export default function App() {
   const [principal, setPrincipal] = useState<PrincipalOut | null>(null)
@@ -60,6 +72,20 @@ export default function App() {
   }
 
   const isAdmin = principal.roles.includes('admin')
+  const isCompliance = principal.roles.includes('compliance')
+  const canGovern = isAdmin || isCompliance
+
+  // Tabs available to this principal, in display order. Role-gated tabs are
+  // omitted entirely (not just disabled) when the role is absent.
+  const tabs: { id: Tab; label: string; visible: boolean }[] = [
+    { id: 'workspace', label: 'Workspace', visible: true },
+    { id: 'registry', label: 'Registry', visible: true },
+    { id: 'jobs', label: 'Jobs', visible: true },
+    { id: 'exports', label: 'Exports', visible: true },
+    { id: 'governance', label: 'Governance', visible: canGovern },
+    { id: 'ops', label: 'Ops', visible: isAdmin },
+    { id: 'admin', label: 'Admin', visible: true },
+  ]
 
   return (
     <div className="app-shell">
@@ -69,22 +95,19 @@ export default function App() {
           <span className="brand-sub">AI Workspace</span>
         </div>
         <nav className="tabs" aria-label="Main navigation">
-          <button
-            type="button"
-            className={tab === 'workspace' ? 'tab active' : 'tab'}
-            aria-current={tab === 'workspace' ? 'page' : undefined}
-            onClick={() => setTab('workspace')}
-          >
-            Workspace
-          </button>
-          <button
-            type="button"
-            className={tab === 'admin' ? 'tab active' : 'tab'}
-            aria-current={tab === 'admin' ? 'page' : undefined}
-            onClick={() => setTab('admin')}
-          >
-            Admin
-          </button>
+          {tabs
+            .filter((t) => t.visible)
+            .map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={tab === t.id ? 'tab active' : 'tab'}
+                aria-current={tab === t.id ? 'page' : undefined}
+                onClick={() => setTab(t.id)}
+              >
+                {t.label}
+              </button>
+            ))}
         </nav>
         <div className="user-area">
           <span className="user-name">
@@ -98,7 +121,23 @@ export default function App() {
       </header>
 
       <main className="content">
-        {tab === 'workspace' ? <Workspace /> : <Admin />}
+        {tab === 'workspace' ? (
+          <Workspace />
+        ) : tab === 'registry' ? (
+          <Registry />
+        ) : tab === 'jobs' ? (
+          <Jobs />
+        ) : tab === 'exports' ? (
+          <Exports isAdmin={isAdmin} />
+        ) : tab === 'governance' && canGovern ? (
+          <Governance />
+        ) : tab === 'ops' && isAdmin ? (
+          <Ops />
+        ) : tab === 'admin' ? (
+          <Admin />
+        ) : (
+          <Workspace />
+        )}
       </main>
     </div>
   )

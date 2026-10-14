@@ -1,6 +1,30 @@
 {
   "components": {
     "schemas": {
+      "AddPackageIn": {
+        "description": "Body for mirroring a package (content carried as UTF-8 text).",
+        "properties": {
+          "content": {
+            "default": "",
+            "title": "Content",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version"
+        ],
+        "title": "AddPackageIn",
+        "type": "object"
+      },
       "AuditVerifyOut": {
         "properties": {
           "broken_at": {
@@ -57,6 +81,37 @@
           "session_id"
         ],
         "title": "CreateSessionIn",
+        "type": "object"
+      },
+      "DenyExportIn": {
+        "description": "Body for denying an export request.",
+        "properties": {
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "title": "DenyExportIn",
+        "type": "object"
+      },
+      "EnrollOut": {
+        "description": "Enrolment response: the shared secret and its provisioning URI.",
+        "properties": {
+          "provisioning_uri": {
+            "title": "Provisioning Uri",
+            "type": "string"
+          },
+          "secret": {
+            "title": "Secret",
+            "type": "string"
+          }
+        },
+        "required": [
+          "secret",
+          "provisioning_uri"
+        ],
+        "title": "EnrollOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -134,6 +189,49 @@
         "title": "HardwareReport",
         "type": "object"
       },
+      "IngestIn": {
+        "description": "Body for an approved-source dataset ingest (FR-33 + FR-08).",
+        "properties": {
+          "approved_sources": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Approved Sources",
+            "type": "array"
+          },
+          "content": {
+            "default": "",
+            "title": "Content",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "sensitivity": {
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "subjects": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Subjects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "source",
+          "sensitivity"
+        ],
+        "title": "IngestIn",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "password": {
@@ -175,6 +273,75 @@
           "username"
         ],
         "title": "PrincipalOut",
+        "type": "object"
+      },
+      "RequestExportIn": {
+        "description": "Body for requesting an export.",
+        "properties": {
+          "resource_ref": {
+            "title": "Resource Ref",
+            "type": "string"
+          },
+          "sensitivity": {
+            "title": "Sensitivity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "resource_ref",
+          "sensitivity"
+        ],
+        "title": "RequestExportIn",
+        "type": "object"
+      },
+      "RetentionPolicyIn": {
+        "description": "One retention policy (exactly one of the two windows is set).",
+        "properties": {
+          "dataset_name": {
+            "title": "Dataset Name",
+            "type": "string"
+          },
+          "retain_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retain Days"
+          },
+          "retain_until": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retain Until"
+          }
+        },
+        "required": [
+          "dataset_name"
+        ],
+        "title": "RetentionPolicyIn",
+        "type": "object"
+      },
+      "RetentionRunIn": {
+        "description": "Body for running retention over a set of policies.",
+        "properties": {
+          "policies": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionPolicyIn"
+            },
+            "title": "Policies",
+            "type": "array"
+          }
+        },
+        "title": "RetentionRunIn",
         "type": "object"
       },
       "RunCellIn": {
@@ -230,6 +397,57 @@
         "title": "SessionOut",
         "type": "object"
       },
+      "SnapshotIn": {
+        "description": "Body for taking a snapshot (optional human label).",
+        "properties": {
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "title": "SnapshotIn",
+        "type": "object"
+      },
+      "SubmitJobIn": {
+        "description": "Body for submitting a job.",
+        "properties": {
+          "allow_egress": {
+            "default": false,
+            "title": "Allow Egress",
+            "type": "boolean"
+          },
+          "command": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Command"
+          },
+          "gpu_memory_mb": {
+            "default": 0,
+            "title": "Gpu Memory Mb",
+            "type": "integer"
+          },
+          "project": {
+            "default": "default",
+            "title": "Project",
+            "type": "string"
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "title": "SubmitJobIn",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -261,6 +479,25 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyIn": {
+        "description": "Body for verifying a TOTP code against a secret.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "secret": {
+            "title": "Secret",
+            "type": "string"
+          }
+        },
+        "required": [
+          "secret",
+          "code"
+        ],
+        "title": "VerifyIn",
         "type": "object"
       }
     }
@@ -383,6 +620,541 @@
         ]
       }
     },
+    "/api/backups": {
+      "get": {
+        "description": "List known backups, newest first.",
+        "operationId": "list_backups_api_backups_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Backups Api Backups Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Backups",
+        "tags": [
+          "backup"
+        ]
+      },
+      "post": {
+        "description": "Take a new snapshot and return its manifest.",
+        "operationId": "snapshot_api_backups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SnapshotIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Snapshot Api Backups Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Snapshot",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "/api/backups/{backup_id}/test-restore": {
+      "post": {
+        "description": "Restore the backup into a temp dir and verify it (FR-42).\n\n:raises NotFound: if the backup id is unknown (mapped to HTTP 404).",
+        "operationId": "test_restore_api_backups__backup_id__test_restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "backup_id",
+            "required": true,
+            "schema": {
+              "title": "Backup Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Test Restore Api Backups  Backup Id  Test Restore Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Test Restore",
+        "tags": [
+          "backup"
+        ]
+      }
+    },
+    "/api/datasets": {
+      "get": {
+        "description": "List every dataset with its versions (latest first per name).",
+        "operationId": "list_datasets_api_datasets_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Datasets Api Datasets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Datasets",
+        "tags": [
+          "registry"
+        ]
+      }
+    },
+    "/api/datasets/{name}": {
+      "get": {
+        "description": "Return every version of dataset ``name``.\n\n:raises NotFound: if the dataset does not exist (mapped to HTTP 404).",
+        "operationId": "get_dataset_api_datasets__name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Dataset Api Datasets  Name  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dataset",
+        "tags": [
+          "registry"
+        ]
+      }
+    },
+    "/api/exports": {
+      "get": {
+        "description": "List every export request.",
+        "operationId": "list_exports_api_exports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Exports Api Exports Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Exports",
+        "tags": [
+          "exports"
+        ]
+      },
+      "post": {
+        "description": "Open an export request for the caller (FR-21).",
+        "operationId": "request_export_api_exports_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Request Export Api Exports Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request Export",
+        "tags": [
+          "exports"
+        ]
+      }
+    },
+    "/api/exports/{request_id}/approve": {
+      "post": {
+        "description": "Approve a pending export request (admin only).\n\n:raises NotFound: if the request is unknown (HTTP 404).\n:raises PolicyDenied: if the request is not pending (HTTP 403).",
+        "operationId": "approve_export_api_exports__request_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Approve Export Api Exports  Request Id  Approve Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Export",
+        "tags": [
+          "exports"
+        ]
+      }
+    },
+    "/api/exports/{request_id}/deny": {
+      "post": {
+        "description": "Deny a pending export request (admin only).\n\n:raises NotFound: if the request is unknown (HTTP 404).\n:raises PolicyDenied: if the request is not pending (HTTP 403).",
+        "operationId": "deny_export_api_exports__request_id__deny_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "title": "Request Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DenyExportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Deny Export Api Exports  Request Id  Deny Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Deny Export",
+        "tags": [
+          "exports"
+        ]
+      }
+    },
+    "/api/governance/dsar/{subject_id}": {
+      "get": {
+        "description": "Return every model built from ``subject_id``'s data (FR-23).",
+        "operationId": "dsar_find_api_governance_dsar__subject_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subject_id",
+            "required": true,
+            "schema": {
+              "title": "Subject Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dsar Find Api Governance Dsar  Subject Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dsar Find",
+        "tags": [
+          "governance"
+        ]
+      }
+    },
+    "/api/governance/dsar/{subject_id}/erase": {
+      "post": {
+        "description": "Flag every model built from ``subject_id``'s data for removal (FR-23).",
+        "operationId": "dsar_erase_api_governance_dsar__subject_id__erase_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subject_id",
+            "required": true,
+            "schema": {
+              "title": "Subject Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Dsar Erase Api Governance Dsar  Subject Id  Erase Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dsar Erase",
+        "tags": [
+          "governance"
+        ]
+      }
+    },
+    "/api/governance/ingest": {
+      "post": {
+        "description": "Ingest a dataset from an approved source with a sensitivity label.\n\n:raises PolicyDenied: if the source is not approved (mapped to HTTP 403).",
+        "operationId": "ingest_api_governance_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Ingest Api Governance Ingest Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ingest",
+        "tags": [
+          "governance"
+        ]
+      }
+    },
+    "/api/governance/retention/run": {
+      "post": {
+        "description": "Run scheduled deletion for the given policies and return the proofs.",
+        "operationId": "run_retention_api_governance_retention_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetentionRunIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Retention Api Governance Retention Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Retention",
+        "tags": [
+          "governance"
+        ]
+      }
+    },
     "/api/installer/hardware": {
       "get": {
         "description": "Return the host hardware report (GPU/CPU/RAM/disk + sizing).",
@@ -402,6 +1174,385 @@
         "summary": "Hardware",
         "tags": [
           "installer"
+        ]
+      }
+    },
+    "/api/jobs": {
+      "get": {
+        "description": "List every job the scheduler knows about (submit order).",
+        "operationId": "list_jobs_api_jobs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Jobs Api Jobs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Jobs",
+        "tags": [
+          "jobs"
+        ]
+      },
+      "post": {
+        "description": "Submit a job for the caller and run the queue.\n\n:raises QuotaExceeded: if a user/project/queue quota is full\n    (mapped to HTTP 429).",
+        "operationId": "submit_job_api_jobs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitJobIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Submit Job Api Jobs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Job",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/api/jobs/{job_id}": {
+      "get": {
+        "description": "Return one job by id.\n\n:raises NotFound: if the job does not exist (mapped to HTTP 404).",
+        "operationId": "get_job_api_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Job Api Jobs  Job Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Job",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/api/mfa/enroll": {
+      "post": {
+        "description": "Mint a fresh TOTP secret + provisioning URI for the caller (FR-17).",
+        "operationId": "enroll_api_mfa_enroll_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Enroll",
+        "tags": [
+          "mfa"
+        ]
+      }
+    },
+    "/api/mfa/verify": {
+      "post": {
+        "description": "Verify a TOTP ``code`` against ``secret`` (FR-17).",
+        "operationId": "verify_api_mfa_verify_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "title": "Response Verify Api Mfa Verify Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify",
+        "tags": [
+          "mfa"
+        ]
+      }
+    },
+    "/api/mirror/packages": {
+      "get": {
+        "description": "List the mirrored packages as ``{name, version}`` records.",
+        "operationId": "list_packages_api_mirror_packages_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "title": "Response List Packages Api Mirror Packages Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Packages",
+        "tags": [
+          "mirror"
+        ]
+      },
+      "post": {
+        "description": "Scan and mirror a package; return its stored meta record.\n\n:raises PolicyDenied: if the scanner blocks the artifact (HTTP 403).",
+        "operationId": "add_package_api_mirror_packages_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPackageIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Package Api Mirror Packages Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Package",
+        "tags": [
+          "mirror"
+        ]
+      }
+    },
+    "/api/models": {
+      "get": {
+        "description": "List every model with its versions.",
+        "operationId": "list_models_api_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Models Api Models Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Models",
+        "tags": [
+          "registry"
+        ]
+      }
+    },
+    "/api/models/{name}": {
+      "get": {
+        "description": "Return every version of model ``name`` with lineage.",
+        "operationId": "get_model_api_models__name__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Model Api Models  Name  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Model",
+        "tags": [
+          "registry"
+        ]
+      }
+    },
+    "/api/models/{name}/{version}": {
+      "get": {
+        "description": "Return one model version and its lineage.\n\n:raises NotFound: if the model/version does not exist (mapped to HTTP 404).",
+        "operationId": "get_model_version_api_models__name___version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Model Version Api Models  Name   Version  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Model Version",
+        "tags": [
+          "registry"
         ]
       }
     },
@@ -613,6 +1764,26 @@
         "summary": "Stop Session",
         "tags": [
           "sessions"
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Render the metrics registry as Prometheus text (unauthenticated).",
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "metrics"
         ]
       }
     }
