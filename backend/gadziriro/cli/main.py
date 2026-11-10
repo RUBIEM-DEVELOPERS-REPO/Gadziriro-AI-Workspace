@@ -7,6 +7,13 @@ uses, so operators can drive the workspace without a browser:
 * ``gadziriro audit verify``  — verify the tamper-evident audit hash chain.
 * ``gadziriro openapi``       — emit the OpenAPI document for the Phase-0 API.
 * ``gadziriro serve``         — launch the uvicorn-hosted gateway.
+* ``gadziriro model-card``    — render a model version's card (FR-36, FR-35).
+* ``gadziriro policy effective`` — print the effective policy for packs (FR-24).
+* ``gadziriro incidents``     — list tracked incidents (FR-38, FR-35).
+
+The Phase 2 subcommands (``model-card``, ``policy``, ``incidents``) build the
+same services the gateway wires, rooted at ``--data-dir`` (default: the
+``GADZIRIRO_DATA_DIR`` setting), so they run without a server.
 
 :func:`main` returns an integer exit code and is wired as the ``gadziriro``
 console script (see ``pyproject.toml``); it is equally callable from tests.
@@ -21,9 +28,28 @@ import json
 from pathlib import Path
 from typing import Optional, Sequence
 
+from ..core.config import Settings, load_settings
+from ..core.objectstore import LocalObjectStore
 from ..gateway.app import app
+from ..incident.response import IncidentService
 from ..installer.hwcheck import check_hardware
+from ..modelcards.card import build_model_card, render_markdown
+from ..policy.packs import describe_precedence, merge_packs
+from ..registry.store import ObjectStoreRegistry
 from .audit_cmd import verify_cmd
+
+
+def _settings_for(args: argparse.Namespace) -> Settings:
+    """Resolve settings for a Phase 2 subcommand (honouring ``--data-dir``)."""
+    data_dir: Optional[str] = getattr(args, "data_dir", None)
+    if data_dir:
+        return Settings(data_dir=Path(data_dir))
+    return load_settings()
+
+
+def _registry_for(settings: Settings) -> ObjectStoreRegistry:
+    """Build a registry over the workspace object store (gateway key layout)."""
+    return ObjectStoreRegistry(LocalObjectStore(settings.data_dir / "objectstore"))
 
 
 def _cmd_hw_check(_: argparse.Namespace) -> int:
@@ -84,6 +110,60 @@ def _cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_model_card(args: argparse.Namespace) -> int:
+    """Render a model version's card to stdout (FR-36, FR-35)."""
+    settings = _settings_for(args)
+    registry = _registry_for(settings)
+    card = build_model_card(
+        registry, f"{args.name}@{args.version}", licence=args.licence
+    )
+    print(render_markdown(card))
+    return 0
+
+
+def _cmd_policy_effective(args: argparse.Namespace) -> int:
+    """Print the effective policy + provenance for the enabled packs (FR-24)."""
+    effective = merge_packs(args.packs)
+    provenance = describe_precedence(args.packs)
+    settings = effective.settings
+
+    print("Gadziriro effective policy")
+    print("==========================")
+    print(f"Enabled packs     : {', '.join(effective.enabled) or 'none'}")
+    labels = ", ".join(sorted(la.value for la in settings.export_approval_labels))
+    fields = {
+        "allow_egress": settings.allow_egress,
+        "require_mfa": settings.require_mfa,
+        "audit_retention_days": settings.audit_retention_days,
+        "data_retention_max_days": settings.data_retention_max_days,
+        "export_approval_labels": labels or "none",
+        "min_session_timeout_s": settings.min_session_timeout_s,
+        "cross_border_transfer_allowed": settings.cross_border_transfer_allowed,
+    }
+    for name, value in fields.items():
+        src = provenance.get(name)
+        src_text = ", ".join(src) if isinstance(src, list) else src
+        print(f"{name:<32}: {value}  (from: {src_text})")
+    return 0
+
+
+def _cmd_incidents(args: argparse.Namespace) -> int:
+    """List tracked incidents from a transient incident service (FR-38, FR-35)."""
+    service = IncidentService()
+    incidents = service.list_incidents()
+    print("Gadziriro incidents")
+    print("===================")
+    if not incidents:
+        print("No incidents recorded.")
+        return 0
+    for incident in incidents:
+        print(
+            f"{incident.incident_id}  [{incident.status}]  "
+            f"{incident.severity}  {incident.title}"
+        )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Construct the top-level argument parser and its subcommands."""
     parser = argparse.ArgumentParser(
@@ -123,6 +203,37 @@ def build_parser() -> argparse.ArgumentParser:
     serve.add_argument("--host", default="127.0.0.1", help="Bind host.")
     serve.add_argument("--port", type=int, default=8080, help="Bind port.")
     serve.set_defaults(func=_cmd_serve)
+
+    model_card = subparsers.add_parser(
+        "model-card", help="Render a model version's card (FR-36)."
+    )
+    model_card.add_argument("name", help="Model name.")
+    model_card.add_argument("version", help="Model version (integer).")
+    model_card.add_argument(
+        "--licence", default="unknown", help="Licence to state on the card."
+    )
+    model_card.add_argument(
+        "--data-dir", default=None, help="Workspace data dir (default: settings)."
+    )
+    model_card.set_defaults(func=_cmd_model_card)
+
+    policy = subparsers.add_parser("policy", help="Compliance policy operations.")
+    policy_sub = policy.add_subparsers(dest="policy_command", required=True)
+    policy_effective = policy_sub.add_parser(
+        "effective", help="Print the effective policy for the enabled packs."
+    )
+    policy_effective.add_argument(
+        "packs", nargs="+", help="Pack names (e.g. hipaa gdpr soc2 zw-dpa)."
+    )
+    policy_effective.set_defaults(func=_cmd_policy_effective)
+
+    incidents = subparsers.add_parser(
+        "incidents", help="List tracked security incidents (FR-38)."
+    )
+    incidents.add_argument(
+        "--data-dir", default=None, help="Workspace data dir (default: settings)."
+    )
+    incidents.set_defaults(func=_cmd_incidents)
 
     return parser
 

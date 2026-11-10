@@ -59,6 +59,33 @@
         "title": "AuditVerifyOut",
         "type": "object"
       },
+      "CompareIn": {
+        "description": "Body for comparing two model versions on the same suite.",
+        "properties": {
+          "a_ref": {
+            "title": "A Ref",
+            "type": "string"
+          },
+          "b_ref": {
+            "title": "B Ref",
+            "type": "string"
+          },
+          "suite": {
+            "items": {
+              "$ref": "#/components/schemas/SuiteItemIn"
+            },
+            "title": "Suite",
+            "type": "array"
+          }
+        },
+        "required": [
+          "a_ref",
+          "b_ref",
+          "suite"
+        ],
+        "title": "CompareIn",
+        "type": "object"
+      },
       "CreateSessionIn": {
         "description": "Body for creating a session.",
         "properties": {
@@ -95,6 +122,53 @@
         "title": "DenyExportIn",
         "type": "object"
       },
+      "DiffIn": {
+        "description": "Body for diffing two model versions (suite optional).",
+        "properties": {
+          "a_ref": {
+            "title": "A Ref",
+            "type": "string"
+          },
+          "b_ref": {
+            "title": "B Ref",
+            "type": "string"
+          },
+          "suite": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/SuiteItemIn"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite"
+          }
+        },
+        "required": [
+          "a_ref",
+          "b_ref"
+        ],
+        "title": "DiffIn",
+        "type": "object"
+      },
+      "EffectiveIn": {
+        "description": "Body for computing an effective policy from enabled packs.",
+        "properties": {
+          "enabled": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Enabled",
+            "type": "array"
+          }
+        },
+        "title": "EffectiveIn",
+        "type": "object"
+      },
       "EnrollOut": {
         "description": "Enrolment response: the shared secret and its provisioning URI.",
         "properties": {
@@ -112,6 +186,134 @@
           "provisioning_uri"
         ],
         "title": "EnrollOut",
+        "type": "object"
+      },
+      "EraseIn": {
+        "description": "Body for an erasure request (optional reason).",
+        "properties": {
+          "reason": {
+            "default": "DSAR erasure",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "title": "EraseIn",
+        "type": "object"
+      },
+      "EvalRunIn": {
+        "description": "Body for evaluating a single model version.",
+        "properties": {
+          "model_ref": {
+            "title": "Model Ref",
+            "type": "string"
+          },
+          "suite": {
+            "items": {
+              "$ref": "#/components/schemas/SuiteItemIn"
+            },
+            "title": "Suite",
+            "type": "array"
+          },
+          "suite_name": {
+            "default": "default",
+            "title": "Suite Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_ref",
+          "suite"
+        ],
+        "title": "EvalRunIn",
+        "type": "object"
+      },
+      "ExportIn": {
+        "description": "Body for exporting a registered model (FR-15).",
+        "properties": {
+          "engine": {
+            "default": "vllm",
+            "title": "Engine",
+            "type": "string"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string"
+          },
+          "model_ref": {
+            "title": "Model Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_ref",
+          "format"
+        ],
+        "title": "ExportIn",
+        "type": "object"
+      },
+      "FineTuneIn": {
+        "description": "Body for launching a fine-tune (analyst form / engineer payload).",
+        "properties": {
+          "base_model": {
+            "title": "Base Model",
+            "type": "string"
+          },
+          "code_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code Ref"
+          },
+          "dataset_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dataset Refs",
+            "type": "array"
+          },
+          "hardware": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hardware"
+          },
+          "hyperparams": {
+            "additionalProperties": true,
+            "title": "Hyperparams",
+            "type": "object"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "output_name": {
+            "title": "Output Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_model",
+          "dataset_refs",
+          "output_name"
+        ],
+        "title": "FineTuneIn",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -232,6 +434,36 @@
         "title": "IngestIn",
         "type": "object"
       },
+      "LicenceCheckIn": {
+        "description": "Body for a licence / export-control check.",
+        "properties": {
+          "destination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Destination"
+          },
+          "intended_use": {
+            "default": "commercial",
+            "title": "Intended Use",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model"
+        ],
+        "title": "LicenceCheckIn",
+        "type": "object"
+      },
       "LoginRequest": {
         "properties": {
           "password": {
@@ -248,6 +480,73 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "MergeIn": {
+        "description": "Body for merging two or more model versions.",
+        "properties": {
+          "out_name": {
+            "title": "Out Name",
+            "type": "string"
+          },
+          "refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Refs",
+            "type": "array"
+          },
+          "weights": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weights"
+          }
+        },
+        "required": [
+          "refs",
+          "out_name"
+        ],
+        "title": "MergeIn",
+        "type": "object"
+      },
+      "OpenIncidentIn": {
+        "description": "Body for opening an incident.",
+        "properties": {
+          "affected_subjects": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Affected Subjects",
+            "type": "array"
+          },
+          "breach": {
+            "default": false,
+            "title": "Breach",
+            "type": "boolean"
+          },
+          "severity": {
+            "default": "medium",
+            "title": "Severity",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "OpenIncidentIn",
         "type": "object"
       },
       "PrincipalOut": {
@@ -273,6 +572,54 @@
           "username"
         ],
         "title": "PrincipalOut",
+        "type": "object"
+      },
+      "PruneIn": {
+        "description": "Body for pruning a model version at a given sparsity.",
+        "properties": {
+          "out_name": {
+            "title": "Out Name",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "sparsity": {
+            "title": "Sparsity",
+            "type": "number"
+          }
+        },
+        "required": [
+          "ref",
+          "sparsity",
+          "out_name"
+        ],
+        "title": "PruneIn",
+        "type": "object"
+      },
+      "QuantizeIn": {
+        "description": "Body for quantizing a model version.",
+        "properties": {
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "out_name": {
+            "title": "Out Name",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "method",
+          "out_name"
+        ],
+        "title": "QuantizeIn",
         "type": "object"
       },
       "RequestExportIn": {
@@ -446,6 +793,59 @@
           "command"
         ],
         "title": "SubmitJobIn",
+        "type": "object"
+      },
+      "SuiteItemIn": {
+        "description": "One suite question (prompt, expected answer, optional weight).",
+        "properties": {
+          "expected": {
+            "title": "Expected",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string"
+          },
+          "weight": {
+            "default": 1.0,
+            "title": "Weight",
+            "type": "number"
+          }
+        },
+        "required": [
+          "prompt",
+          "expected"
+        ],
+        "title": "SuiteItemIn",
+        "type": "object"
+      },
+      "UpdateIncidentIn": {
+        "description": "Body for updating an incident (status and/or note).",
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "title": "UpdateIncidentIn",
         "type": "object"
       },
       "ValidationError": {
@@ -808,6 +1208,238 @@
         ]
       }
     },
+    "/api/dsar/{subject}/erase": {
+      "post": {
+        "description": "Erase ``subject``'s data and flag every model built on it (FR-45).",
+        "operationId": "erase_subject_api_dsar__subject__erase_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subject",
+            "required": true,
+            "schema": {
+              "title": "Subject",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EraseIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Erase Subject Api Dsar  Subject  Erase Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Erase Subject",
+        "tags": [
+          "dsar"
+        ]
+      }
+    },
+    "/api/dsar/{subject}/export": {
+      "post": {
+        "description": "Export every dataset containing ``subject`` plus its models (FR-45).",
+        "operationId": "export_subject_api_dsar__subject__export_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subject",
+            "required": true,
+            "schema": {
+              "title": "Subject",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export Subject Api Dsar  Subject  Export Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Subject",
+        "tags": [
+          "dsar"
+        ]
+      }
+    },
+    "/api/evaluation/compare": {
+      "post": {
+        "description": "Compare two model versions on the same suite (FR-11).\n\n:raises NotFound: if either model does not exist (HTTP 404).",
+        "operationId": "compare_models_api_evaluation_compare_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Compare Models Api Evaluation Compare Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Compare Models",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/api/evaluation/diff": {
+      "post": {
+        "description": "Diff two model versions, optionally scoring them on a suite (FR-13).\n\n:raises NotFound: if either model does not exist (HTTP 404).",
+        "operationId": "diff_api_evaluation_diff_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiffIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Diff Api Evaluation Diff Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Diff",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/api/evaluation/run": {
+      "post": {
+        "description": "Evaluate ``model_ref`` against the supplied suite (FR-11).\n\n:raises NotFound: if the model does not exist (HTTP 404).",
+        "operationId": "run_api_evaluation_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvalRunIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Api Evaluation Run Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
     "/api/exports": {
       "get": {
         "description": "List every export request.",
@@ -1155,6 +1787,175 @@
         ]
       }
     },
+    "/api/incidents": {
+      "get": {
+        "description": "List every tracked incident, oldest first (FR-38).",
+        "operationId": "list_incidents_api_incidents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Incidents Api Incidents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Incidents",
+        "tags": [
+          "incidents"
+        ]
+      },
+      "post": {
+        "description": "Open a new incident and audit it (FR-38).",
+        "operationId": "open_incident_api_incidents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenIncidentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Open Incident Api Incidents Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Incident",
+        "tags": [
+          "incidents"
+        ]
+      }
+    },
+    "/api/incidents/{incident_id}/breach-report": {
+      "get": {
+        "description": "Build the draft breach-notification report for an incident (FR-38).\n\n:raises NotFound: if the incident is unknown (404).",
+        "operationId": "breach_report_api_incidents__incident_id__breach_report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "incident_id",
+            "required": true,
+            "schema": {
+              "title": "Incident Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Breach Report Api Incidents  Incident Id  Breach Report Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Breach Report",
+        "tags": [
+          "incidents"
+        ]
+      }
+    },
+    "/api/incidents/{incident_id}/update": {
+      "post": {
+        "description": "Update an incident's status and/or append a note (FR-38).\n\n:raises NotFound: if the incident is unknown (404).\n:raises GadziriroError: if ``status`` is not a valid lifecycle state (400).",
+        "operationId": "update_incident_api_incidents__incident_id__update_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "incident_id",
+            "required": true,
+            "schema": {
+              "title": "Incident Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIncidentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Incident Api Incidents  Incident Id  Update Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Incident",
+        "tags": [
+          "incidents"
+        ]
+      }
+    },
     "/api/installer/hardware": {
       "get": {
         "description": "Return the host hardware report (GPU/CPU/RAM/disk + sizing).",
@@ -1288,6 +2089,95 @@
         "summary": "Get Job",
         "tags": [
           "jobs"
+        ]
+      }
+    },
+    "/api/licensing/check": {
+      "post": {
+        "description": "Gate a model's use (and export) against its licence (FR-48).\n\n:raises PolicyDenied: if the use or export is forbidden (HTTP 403).",
+        "operationId": "check_api_licensing_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LicenceCheckIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Check Api Licensing Check Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check",
+        "tags": [
+          "licensing"
+        ]
+      }
+    },
+    "/api/licensing/{model}": {
+      "get": {
+        "description": "Return the licence record for ``model`` by family prefix (FR-48).",
+        "operationId": "get_licence_api_licensing__model__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model",
+            "required": true,
+            "schema": {
+              "title": "Model",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Licence Api Licensing  Model  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Licence",
+        "tags": [
+          "licensing"
         ]
       }
     },
@@ -1430,6 +2320,80 @@
         ]
       }
     },
+    "/api/modelcards/{name}/{version}": {
+      "get": {
+        "description": "Build + render a model card, optionally persisting it (FR-36).\n\n``licence`` sets the card's stated licence; ``store_card_flag`` (query\n``store_card_flag=true``) also writes the rendered card to the object store.\n\n:raises NotFound: if the model/version does not exist (404).",
+        "operationId": "get_model_card_api_modelcards__name___version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "licence",
+            "required": false,
+            "schema": {
+              "default": "unknown",
+              "title": "Licence",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "store_card_flag",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Store Card Flag",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Model Card Api Modelcards  Name   Version  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Model Card",
+        "tags": [
+          "modelcards"
+        ]
+      }
+    },
     "/api/models": {
       "get": {
         "description": "List every model with its versions.",
@@ -1553,6 +2517,189 @@
         "summary": "Get Model Version",
         "tags": [
           "registry"
+        ]
+      }
+    },
+    "/api/modelstudio/export": {
+      "post": {
+        "description": "Export a registered model and return the artifact + serving command (FR-15).\n\n:raises GadziriroError: for an unknown export format (HTTP 400).\n:raises NotFound: if the model does not exist (HTTP 404).",
+        "operationId": "export_api_modelstudio_export_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export Api Modelstudio Export Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export",
+        "tags": [
+          "modelstudio"
+        ]
+      }
+    },
+    "/api/modelstudio/finetune": {
+      "post": {
+        "description": "Run a (mock) fine-tune and register the resulting model (FR-10).\n\n:raises GadziriroError: for a malformed form (e.g. unknown method) \u2014 HTTP 400.",
+        "operationId": "finetune_api_modelstudio_finetune_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FineTuneIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Finetune Api Modelstudio Finetune Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Finetune",
+        "tags": [
+          "modelstudio"
+        ]
+      }
+    },
+    "/api/modelstudio/templates": {
+      "get": {
+        "description": "Return the per-method fine-tune hyper-parameter templates (FR-10).",
+        "operationId": "templates_api_modelstudio_templates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Templates Api Modelstudio Templates Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Templates",
+        "tags": [
+          "modelstudio"
+        ]
+      }
+    },
+    "/api/policy/packs": {
+      "get": {
+        "description": "List every available compliance policy pack (FR-24).",
+        "operationId": "list_packs_api_policy_packs_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Packs Api Policy Packs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Packs",
+        "tags": [
+          "policypacks"
+        ]
+      }
+    },
+    "/api/policy/packs/effective": {
+      "post": {
+        "description": "Merge enabled packs into a strictest-wins effective policy (FR-24).\n\n:raises ConfigError: if a pack name is unknown (mapped to HTTP 400).",
+        "operationId": "effective_api_policy_packs_effective_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EffectiveIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Effective Api Policy Packs Effective Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Effective",
+        "tags": [
+          "policypacks"
         ]
       }
     },
@@ -1764,6 +2911,216 @@
         "summary": "Stop Session",
         "tags": [
           "sessions"
+        ]
+      }
+    },
+    "/api/support/bundle": {
+      "post": {
+        "description": "Build a PII-stripped support bundle and store it (FR-40).",
+        "operationId": "build_bundle_api_support_bundle_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Build Bundle Api Support Bundle Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Build Bundle",
+        "tags": [
+          "support"
+        ]
+      }
+    },
+    "/api/weighttools/inspect/{name}/{version}": {
+      "get": {
+        "description": "Return a deterministic summary of a model version's artifact (FR-12).\n\n:raises NotFound: if the model/version does not exist (404).",
+        "operationId": "inspect_model_api_weighttools_inspect__name___version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Inspect Model Api Weighttools Inspect  Name   Version  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Inspect Model",
+        "tags": [
+          "weighttools"
+        ]
+      }
+    },
+    "/api/weighttools/merge": {
+      "post": {
+        "description": "Merge model versions into a new registered version (FR-12).\n\n:raises GadziriroError: for fewer than two refs or a bad weights list (400).\n:raises NotFound: if a source ref is unknown (404).",
+        "operationId": "merge_models_api_weighttools_merge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Merge Models Api Weighttools Merge Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge Models",
+        "tags": [
+          "weighttools"
+        ]
+      }
+    },
+    "/api/weighttools/prune": {
+      "post": {
+        "description": "Prune a model version at a given sparsity into a new version (FR-12).\n\n:raises GadziriroError: if ``sparsity`` is outside ``[0, 1]`` (400).\n:raises NotFound: if the source ref is unknown (404).",
+        "operationId": "prune_model_api_weighttools_prune_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PruneIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Prune Model Api Weighttools Prune Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Prune Model",
+        "tags": [
+          "weighttools"
+        ]
+      }
+    },
+    "/api/weighttools/quantize": {
+      "post": {
+        "description": "Quantize a model version into a new, smaller registered version (FR-12).\n\n:raises GadziriroError: for an unknown quantization method (400).\n:raises NotFound: if the source ref is unknown (404).",
+        "operationId": "quantize_model_api_weighttools_quantize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuantizeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Quantize Model Api Weighttools Quantize Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Quantize Model",
+        "tags": [
+          "weighttools"
         ]
       }
     },
