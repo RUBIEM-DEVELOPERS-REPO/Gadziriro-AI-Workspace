@@ -74,7 +74,7 @@ export default function Registry() {
       <div className="panel">
         <h2>Datasets</h2>
         {loading ? (
-          <p className="muted">Loading datasets…</p>
+          <p className="muted" role="status">Loading datasets…</p>
         ) : datasets.length === 0 ? (
           <p className="muted">No datasets registered.</p>
         ) : (
@@ -110,7 +110,7 @@ export default function Registry() {
       <div className="panel">
         <h2>Models</h2>
         {loading ? (
-          <p className="muted">Loading models…</p>
+          <p className="muted" role="status">Loading models…</p>
         ) : models.length === 0 ? (
           <p className="muted">No models registered.</p>
         ) : (

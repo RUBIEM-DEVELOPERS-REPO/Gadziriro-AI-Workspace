@@ -15,7 +15,7 @@ function ResultView({ result }: { result: WeightToolResult }) {
       ) : null}
       {summary !== undefined ? (
         <div className="field">
-          <label>Summary</label>
+          <span className="field-label">Summary</span>
           <pre className="cell-output">
             {typeof summary === 'string'
               ? summary
@@ -25,7 +25,7 @@ function ResultView({ result }: { result: WeightToolResult }) {
       ) : null}
       {Object.keys(rest).length ? (
         <div className="field">
-          <label>Details</label>
+          <span className="field-label">Details</span>
           <pre className="cell-output">{JSON.stringify(rest, null, 2)}</pre>
         </div>
       ) : null}

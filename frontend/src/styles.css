@@ -6,11 +6,14 @@
   --muted: #9aa1ad;
   --accent: #4f8cff;
   --accent-hover: #3a79f0;
-  --danger: #e5484d;
+  --accent-btn: #2563eb;
+  --accent-btn-hover: #1d4ed8;
+  --input-border: #7b8494;
+  --danger: #f2666b;
   --ok: #2fb67c;
   --sealed: #2fb67c;
   --egress: #e5a23d;
-  --broken: #e5484d;
+  --broken: #f2666b;
   --radius: 10px;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color-scheme: dark;
@@ -150,7 +153,8 @@ body {
   gap: 0.35rem;
 }
 
-.field label {
+.field label,
+.field-label {
   font-size: 0.82rem;
   color: var(--muted);
 }
@@ -158,7 +162,7 @@ body {
 input,
 textarea {
   background: #0f1217;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   color: var(--text);
   padding: 0.55rem 0.7rem;
@@ -185,12 +189,12 @@ textarea:focus {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: var(--accent-btn);
   color: #fff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: var(--accent-btn-hover);
 }
 
 .btn-primary:disabled {
@@ -210,14 +214,14 @@ textarea:focus {
 
 .btn-danger {
   background: transparent;
-  border: 1px solid rgba(229, 72, 77, 0.4);
+  border: 1px solid rgba(242, 102, 107, 0.4);
   color: var(--danger);
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
 }
 
 .btn-danger:hover {
-  background: rgba(229, 72, 77, 0.12);
+  background: rgba(242, 102, 107, 0.12);
 }
 
 /* Login */
@@ -329,7 +333,7 @@ textarea:focus {
 }
 
 .badge-broken {
-  background: rgba(229, 72, 77, 0.16);
+  background: rgba(242, 102, 107, 0.16);
   color: var(--broken);
 }
 
@@ -480,9 +484,9 @@ textarea:focus {
 }
 
 .chip-restricted {
-  background: rgba(229, 72, 77, 0.16);
+  background: rgba(242, 102, 107, 0.16);
   color: var(--danger);
-  border-color: rgba(229, 72, 77, 0.4);
+  border-color: rgba(242, 102, 107, 0.4);
 }
 
 .chip-neutral {
@@ -531,7 +535,7 @@ textarea:focus {
 
 select {
   background: #0f1217;
-  border: 1px solid var(--panel-border);
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   color: var(--text);
   padding: 0.55rem 0.7rem;
@@ -581,4 +585,64 @@ select:focus {
 .checkbox-label input {
   width: auto;
   padding: 0;
+}
+
+/* --- Accessibility (WCAG 2.1 AA) ------------------------------------------ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  background: var(--accent-btn);
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* Visible keyboard focus on every interactive control. */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[role='tab']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #8db4ff;
+  outline-offset: 2px;
+}
+
+.content:focus {
+  outline: none;
+}
+
+.tabs {
+  flex-wrap: wrap;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }

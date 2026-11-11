@@ -95,7 +95,7 @@ export default function Ops() {
         ) : null}
 
         {loading ? (
-          <p className="muted">Loading backups…</p>
+          <p className="muted" role="status">Loading backups…</p>
         ) : backups.length === 0 ? (
           <p className="muted">No backups yet.</p>
         ) : (
@@ -158,7 +158,7 @@ export default function Ops() {
             {metricsError}
           </p>
         ) : metricsLoading && !metrics ? (
-          <p className="muted">Loading metrics…</p>
+          <p className="muted" role="status">Loading metrics…</p>
         ) : (
           <pre className="cell-output metrics-output">
             {metrics || '(no metrics)'}

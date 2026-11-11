@@ -7,6 +7,7 @@ import {
   type LicenseCheckResult,
   type PolicyPack,
 } from '../api/client.ts'
+import ComplianceRecords from './ComplianceRecords.tsx'
 
 const DEFAULT_PACKS = ['hipaa', 'gdpr', 'soc2', 'zw-dpa']
 
@@ -334,13 +335,13 @@ export default function Compliance() {
           </p>
         ) : null}
         {licDenied ? (
-          <p>
+          <p role="status">
             <span className="badge badge-broken">denied</span>{' '}
             <span className="muted">{licDenied}</span>
           </p>
         ) : null}
         {licResult ? (
-          <p>
+          <p role="status">
             {licResult.ok ? (
               <span className="badge badge-ok">allowed</span>
             ) : (
@@ -448,7 +449,7 @@ export default function Compliance() {
 
         {breachReport !== null ? (
           <div className="field">
-            <label>Breach report — incident {breachForId}</label>
+            <span className="field-label">Breach report — incident {breachForId}</span>
             <pre className="cell-output model-card">{breachReport}</pre>
           </div>
         ) : null}
@@ -517,6 +518,8 @@ export default function Compliance() {
         ) : null}
         {bundleResult ? <pre className="cell-output">{bundleResult}</pre> : null}
       </div>
+
+      <ComplianceRecords />
     </section>
   )
 }

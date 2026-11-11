@@ -101,7 +101,7 @@ export default function Admin() {
       <div className="panel">
         <h2>Hardware report</h2>
         {loading && !hardware && !hwError ? (
-          <p className="muted">Loading hardware report…</p>
+          <p className="muted" role="status">Loading hardware report…</p>
         ) : hwError ? (
           <p className="error" role="alert">
             {hwError}
@@ -171,13 +171,13 @@ export default function Admin() {
         {auditForbidden ? (
           <p className="muted">admin only</p>
         ) : loading && !audit && !auditError ? (
-          <p className="muted">Verifying audit chain…</p>
+          <p className="muted" role="status">Verifying audit chain…</p>
         ) : auditError ? (
           <p className="error" role="alert">
             {auditError}
           </p>
         ) : audit ? (
-          <div className="audit">
+          <div className="audit" role="status" aria-live="polite">
             <p>
               Status:{' '}
               {audit.ok ? (

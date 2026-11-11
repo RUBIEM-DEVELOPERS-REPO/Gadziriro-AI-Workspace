@@ -25,6 +25,25 @@
         "title": "AddPackageIn",
         "type": "object"
       },
+      "ApplyUpdateIn": {
+        "description": "Body for applying an update: the signed bundle, base64-encoded.",
+        "properties": {
+          "bundle_b64": {
+            "title": "Bundle B64",
+            "type": "string"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "bundle_b64"
+        ],
+        "title": "ApplyUpdateIn",
+        "type": "object"
+      },
       "AuditVerifyOut": {
         "properties": {
           "broken_at": {
@@ -57,6 +76,57 @@
           "count"
         ],
         "title": "AuditVerifyOut",
+        "type": "object"
+      },
+      "BiasIn": {
+        "description": "Body for a bias check.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BiasItemIn"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "model_ref": {
+            "title": "Model Ref",
+            "type": "string"
+          },
+          "threshold": {
+            "default": 0.1,
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "model_ref",
+          "items"
+        ],
+        "title": "BiasIn",
+        "type": "object"
+      },
+      "BiasItemIn": {
+        "description": "One bias test item: a template with a ``{group}`` slot + groups.",
+        "properties": {
+          "groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "template": {
+            "title": "Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "template",
+          "groups"
+        ],
+        "title": "BiasItemIn",
         "type": "object"
       },
       "CompareIn": {
@@ -110,6 +180,34 @@
         "title": "CreateSessionIn",
         "type": "object"
       },
+      "DatasetAclIn": {
+        "description": "Body for setting a dataset ACL.",
+        "properties": {
+          "allow_roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allow Roles",
+            "type": "array"
+          },
+          "allow_users": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allow Users",
+            "type": "array"
+          },
+          "deny_users": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Deny Users",
+            "type": "array"
+          }
+        },
+        "title": "DatasetAclIn",
+        "type": "object"
+      },
       "DenyExportIn": {
         "description": "Body for denying an export request.",
         "properties": {
@@ -153,6 +251,78 @@
           "b_ref"
         ],
         "title": "DiffIn",
+        "type": "object"
+      },
+      "DpiaIn": {
+        "description": "Body for creating a DPIA.",
+        "properties": {
+          "from_template": {
+            "default": true,
+            "title": "From Template",
+            "type": "boolean"
+          },
+          "scope": {
+            "default": "",
+            "title": "Scope",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "DpiaIn",
+        "type": "object"
+      },
+      "DpiaRiskIn": {
+        "description": "Body for adding a DPIA risk.",
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "impact": {
+            "title": "Impact",
+            "type": "string"
+          },
+          "likelihood": {
+            "title": "Likelihood",
+            "type": "string"
+          },
+          "mitigation": {
+            "title": "Mitigation",
+            "type": "string"
+          },
+          "residual": {
+            "title": "Residual",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "likelihood",
+          "impact",
+          "mitigation",
+          "residual"
+        ],
+        "title": "DpiaRiskIn",
+        "type": "object"
+      },
+      "DpiaStatusIn": {
+        "description": "Body for a DPIA status change.",
+        "properties": {
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "DpiaStatusIn",
         "type": "object"
       },
       "EffectiveIn": {
@@ -620,6 +790,20 @@
           "out_name"
         ],
         "title": "QuantizeIn",
+        "type": "object"
+      },
+      "RedTeamIn": {
+        "description": "Body for a red-team run.",
+        "properties": {
+          "model_ref": {
+            "title": "Model Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_ref"
+        ],
+        "title": "RedTeamIn",
         "type": "object"
       },
       "RequestExportIn": {
@@ -1136,6 +1320,254 @@
         ]
       }
     },
+    "/api/compliance/dpia": {
+      "get": {
+        "description": "List every DPIA.",
+        "operationId": "list_dpias_api_compliance_dpia_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Dpias Api Compliance Dpia Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Dpias",
+        "tags": [
+          "compliance"
+        ]
+      },
+      "post": {
+        "description": "Create a DPIA (assessor = the calling user).",
+        "operationId": "create_dpia_api_compliance_dpia_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DpiaIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Dpia Api Compliance Dpia Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Dpia",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/api/compliance/dpia/{dpia_id}": {
+      "get": {
+        "description": "Read one DPIA (404 if unknown).",
+        "operationId": "get_dpia_api_compliance_dpia__dpia_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dpia_id",
+            "required": true,
+            "schema": {
+              "title": "Dpia Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Dpia Api Compliance Dpia  Dpia Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dpia",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/api/compliance/dpia/{dpia_id}/risk": {
+      "post": {
+        "description": "Add a risk to a DPIA.",
+        "operationId": "add_dpia_risk_api_compliance_dpia__dpia_id__risk_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dpia_id",
+            "required": true,
+            "schema": {
+              "title": "Dpia Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DpiaRiskIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Add Dpia Risk Api Compliance Dpia  Dpia Id  Risk Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Dpia Risk",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/api/compliance/dpia/{dpia_id}/status": {
+      "post": {
+        "description": "Change DPIA status (400 on an invalid transition).",
+        "operationId": "set_dpia_status_api_compliance_dpia__dpia_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dpia_id",
+            "required": true,
+            "schema": {
+              "title": "Dpia Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DpiaStatusIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Set Dpia Status Api Compliance Dpia  Dpia Id  Status Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Dpia Status",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/api/compliance/ropa": {
+      "get": {
+        "description": "Build the ROPA from personal-data datasets, export it, return the register.",
+        "operationId": "ropa_api_compliance_ropa_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Ropa Api Compliance Ropa Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ropa",
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
     "/api/datasets": {
       "get": {
         "description": "List every dataset with its versions (latest first per name).",
@@ -1205,6 +1637,104 @@
         "summary": "Get Dataset",
         "tags": [
           "registry"
+        ]
+      }
+    },
+    "/api/datasets/{name}/acl": {
+      "get": {
+        "description": "Return a dataset's ACL (404 if none is set).",
+        "operationId": "get_acl_api_datasets__name__acl_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Acl Api Datasets  Name  Acl Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Acl",
+        "tags": [
+          "dataset-acl"
+        ]
+      },
+      "put": {
+        "description": "Set (replace) the ACL for a dataset (400 on an unknown role).",
+        "operationId": "put_acl_api_datasets__name__acl_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetAclIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Put Acl Api Datasets  Name  Acl Put",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Acl",
+        "tags": [
+          "dataset-acl"
         ]
       }
     },
@@ -2703,6 +3233,146 @@
         ]
       }
     },
+    "/api/reports/egress": {
+      "get": {
+        "description": "Summarise transfer-relevant audit events as an egress report.",
+        "operationId": "egress_report_api_reports_egress_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Egress Report Api Reports Egress Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Egress Report",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/safety/bias": {
+      "post": {
+        "description": "Run a bias check and return pass/fail plus per-item detail.",
+        "operationId": "bias_check_api_safety_bias_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BiasIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Bias Check Api Safety Bias Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bias Check",
+        "tags": [
+          "safety"
+        ]
+      }
+    },
+    "/api/safety/redteam": {
+      "post": {
+        "description": "Run the red-team suite and return pass/fail plus flagged answers.",
+        "operationId": "redteam_api_safety_redteam_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RedTeamIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Redteam Api Safety Redteam Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Redteam",
+        "tags": [
+          "safety"
+        ]
+      }
+    },
     "/api/sessions": {
       "get": {
         "description": "List all live sessions.",
@@ -2935,6 +3605,98 @@
         "summary": "Build Bundle",
         "tags": [
           "support"
+        ]
+      }
+    },
+    "/api/updates/apply": {
+      "post": {
+        "description": "Verify and apply a signed update bundle (400 if unsigned/tampered).",
+        "operationId": "apply_update_api_updates_apply_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyUpdateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Apply Update Api Updates Apply Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Apply Update",
+        "tags": [
+          "updates"
+        ]
+      }
+    },
+    "/api/updates/history": {
+      "get": {
+        "description": "Return the current version and the apply/rollback history.",
+        "operationId": "update_history_api_updates_history_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update History Api Updates History Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Update History",
+        "tags": [
+          "updates"
+        ]
+      }
+    },
+    "/api/updates/rollback": {
+      "post": {
+        "description": "Revert to the previously applied version (400 if none).",
+        "operationId": "rollback_update_api_updates_rollback_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Rollback Update Api Updates Rollback Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Rollback Update",
+        "tags": [
+          "updates"
         ]
       }
     },

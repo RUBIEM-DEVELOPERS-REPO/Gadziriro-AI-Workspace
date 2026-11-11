@@ -179,6 +179,71 @@ export interface Incident {
   [key: string]: unknown
 }
 
+// --- Phase 3 contracts: updates, dataset ACL, egress, safety, ROPA/DPIA ---
+
+export interface UpdateHistoryEntry {
+  action: string
+  version?: string
+  [key: string]: unknown
+}
+
+export interface DatasetAcl {
+  allow_roles?: string[]
+  allow_users?: string[]
+  deny_users?: string[]
+  [key: string]: unknown
+}
+
+export interface EgressEntry {
+  timestamp?: string
+  user?: string
+  destination?: string
+  resource_ref?: string
+  approved?: boolean
+  reason?: string
+  [key: string]: unknown
+}
+
+export interface EgressReport {
+  generated_at?: string
+  entries?: EgressEntry[]
+  total?: number
+  approved_count?: number
+  denied_count?: number
+}
+
+export interface BiasItem {
+  template: string
+  groups: string[]
+}
+
+export interface BiasResult {
+  disparity?: number
+  passed?: boolean
+  [key: string]: unknown
+}
+
+export interface RedTeamResult {
+  total?: number
+  passed?: number
+  unsafe?: unknown[] | number
+  [key: string]: unknown
+}
+
+export interface RopaActivity {
+  [key: string]: unknown
+}
+
+export interface Dpia {
+  id: string
+  title?: string
+  scope?: string
+  assessor?: string
+  status?: string
+  created_at?: string
+  [key: string]: unknown
+}
+
 export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -587,5 +652,83 @@ export const api = {
   // --- Support bundle (FR-40) ----------------------------------------------
   supportBundle(): Promise<unknown> {
     return request<unknown>('/api/support/bundle', { method: 'POST' })
+  },
+
+  // --- Phase 3: signed updates (admin) -------------------------------------
+  updateApply(bundleB64: string): Promise<UpdateHistoryEntry> {
+    return request<UpdateHistoryEntry>('/api/updates/apply', {
+      method: 'POST',
+      body: JSON.stringify({ bundle_b64: bundleB64 }),
+    })
+  },
+
+  updateRollback(): Promise<UpdateHistoryEntry> {
+    return request<UpdateHistoryEntry>('/api/updates/rollback', {
+      method: 'POST',
+    })
+  },
+
+  updateHistory(): Promise<UpdateHistoryEntry[]> {
+    return request<UpdateHistoryEntry[]>('/api/updates/history')
+  },
+
+  // --- Phase 3: dataset ACL ------------------------------------------------
+  setDatasetAcl(name: string, acl: DatasetAcl): Promise<DatasetAcl> {
+    return request<DatasetAcl>(`/api/datasets/${encodeURIComponent(name)}/acl`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        allow_roles: acl.allow_roles ?? [],
+        allow_users: acl.allow_users ?? [],
+        deny_users: acl.deny_users ?? [],
+      }),
+    })
+  },
+
+  getDatasetAcl(name: string): Promise<DatasetAcl> {
+    return request<DatasetAcl>(`/api/datasets/${encodeURIComponent(name)}/acl`)
+  },
+
+  // --- Phase 3: egress report ----------------------------------------------
+  egressReport(since?: string): Promise<EgressReport> {
+    const q = since ? `?since=${encodeURIComponent(since)}` : ''
+    return request<EgressReport>(`/api/reports/egress${q}`)
+  },
+
+  // --- Phase 3: safety -----------------------------------------------------
+  safetyBias(modelRef: string, items: BiasItem[]): Promise<BiasResult> {
+    return request<BiasResult>('/api/safety/bias', {
+      method: 'POST',
+      body: JSON.stringify({ model_ref: modelRef, items }),
+    })
+  },
+
+  safetyRedteam(modelRef: string): Promise<RedTeamResult> {
+    return request<RedTeamResult>('/api/safety/redteam', {
+      method: 'POST',
+      body: JSON.stringify({ model_ref: modelRef }),
+    })
+  },
+
+  // --- Phase 3: ROPA / DPIA ------------------------------------------------
+  complianceRopa(): Promise<RopaActivity[]> {
+    return request<RopaActivity[]>('/api/compliance/ropa')
+  },
+
+  createDpia(title: string, scope: string, assessor: string): Promise<Dpia> {
+    return request<Dpia>('/api/compliance/dpia', {
+      method: 'POST',
+      body: JSON.stringify({ title, scope, assessor }),
+    })
+  },
+
+  listDpias(): Promise<Dpia[]> {
+    return request<Dpia[]>('/api/compliance/dpia')
+  },
+
+  setDpiaStatus(id: string, status: string): Promise<Dpia> {
+    return request<Dpia>(
+      `/api/compliance/dpia/${encodeURIComponent(id)}/status`,
+      { method: 'POST', body: JSON.stringify({ status }) },
+    )
   },
 }

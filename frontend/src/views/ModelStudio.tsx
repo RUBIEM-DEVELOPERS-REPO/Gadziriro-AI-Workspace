@@ -254,14 +254,14 @@ export default function ModelStudio() {
             {exportResult.serving_command &&
             exportResult.serving_command.length ? (
               <div className="field">
-                <label>Serving command</label>
+                <span className="field-label">Serving command</span>
                 <pre className="cell-output">
                   {exportResult.serving_command.join(' ')}
                 </pre>
               </div>
             ) : null}
             <div className="field">
-              <label>Serving manifest</label>
+              <span className="field-label">Serving manifest</span>
               <pre className="cell-output">
                 {JSON.stringify(exportResult.serving_manifest ?? {}, null, 2)}
               </pre>

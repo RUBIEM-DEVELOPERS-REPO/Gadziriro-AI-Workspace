@@ -15,3 +15,4 @@ Chronological record of decisions (section 13 governance). ADRs hold the detail.
 | TODO | Plug-in sandboxing/signing | Open (Phase 4) | BRD §14 |
 | 2026-10-14 | Phase 1 pilot foundations delivered (registry/lineage, SSO/MFA/RBAC, scheduler/quotas, mirror, backup/restore, observability, governance, export approval) | Done | PR (stacked on Phase 0) |
 | 2026-10-14 | Phase 2 Model Studio delivered (fine-tune/eval/diff/weight-tools/export, model cards, licence+export checks, policy packs, incident response, DSAR export/erase, support bundles, API/CLI+UI) | Done | PR stacked |
+| 2026-11-11 | Phase 3 enterprise scale delivered (multi-node K8s/Slurm, signed updates, per-dataset ACL, egress report, bias/red-team, ROPA/DPIA, WCAG AA, pentest scaffold; gateway 74 routes + CLI + UI) | Done | PR stacked |
