@@ -26,4 +26,12 @@ def get_runtime_adapter(settings: Settings) -> RuntimeAdapter:
         from .docker import DockerRuntimeAdapter
 
         return DockerRuntimeAdapter(settings=settings)
+    if backend in {"kubernetes", "k8s"}:
+        from .kubernetes import KubernetesRuntimeAdapter
+
+        return KubernetesRuntimeAdapter()
+    if backend == "slurm":
+        from .slurm import SlurmRuntimeAdapter
+
+        return SlurmRuntimeAdapter()
     raise RuntimeAdapterError(f"unknown runtime backend: {settings.runtime_backend!r}")
