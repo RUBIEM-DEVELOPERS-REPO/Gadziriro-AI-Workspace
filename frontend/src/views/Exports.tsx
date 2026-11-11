@@ -118,7 +118,7 @@ export default function Exports({ isAdmin }: Props) {
       <div className="panel">
         <h2>My export requests</h2>
         {loading ? (
-          <p className="muted">Loading requests…</p>
+          <p className="muted" role="status">Loading requests…</p>
         ) : requests.length === 0 ? (
           <p className="muted">No export requests yet.</p>
         ) : (
@@ -159,7 +159,7 @@ export default function Exports({ isAdmin }: Props) {
         <div className="panel">
           <h2>Pending review</h2>
           {loading ? (
-            <p className="muted">Loading…</p>
+            <p className="muted" role="status">Loading…</p>
           ) : pending.length === 0 ? (
             <p className="muted">No requests awaiting review.</p>
           ) : (

@@ -104,7 +104,7 @@ export default function Jobs() {
           </p>
         ) : null}
         {loading ? (
-          <p className="muted">Loading jobs…</p>
+          <p className="muted" role="status">Loading jobs…</p>
         ) : jobs.length === 0 ? (
           <p className="muted">No jobs submitted yet.</p>
         ) : (

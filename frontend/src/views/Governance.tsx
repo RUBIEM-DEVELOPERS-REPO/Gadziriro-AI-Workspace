@@ -181,7 +181,7 @@ export default function Governance() {
         >
           {retentionBusy ? 'Running…' : 'Run now'}
         </button>
-        {retentionMsg ? <p className="muted">{retentionMsg}</p> : null}
+        {retentionMsg ? <p className="muted" role="status" aria-live="polite">{retentionMsg}</p> : null}
       </div>
     </section>
   )

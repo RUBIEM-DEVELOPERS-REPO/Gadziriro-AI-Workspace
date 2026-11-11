@@ -122,7 +122,7 @@ export default function Evaluate() {
               <th>Prompt</th>
               <th>Expected</th>
               <th>Weight</th>
-              <th></th>
+              <th><span className="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
@@ -134,6 +134,7 @@ export default function Evaluate() {
                     value={r.prompt}
                     onChange={(e) => updateRow(i, { prompt: e.target.value })}
                     placeholder="prompt"
+                    aria-label={`Prompt, row ${i + 1}`}
                   />
                 </td>
                 <td>
@@ -142,6 +143,7 @@ export default function Evaluate() {
                     value={r.expected}
                     onChange={(e) => updateRow(i, { expected: e.target.value })}
                     placeholder="expected"
+                    aria-label={`Expected answer, row ${i + 1}`}
                   />
                 </td>
                 <td>
@@ -151,6 +153,7 @@ export default function Evaluate() {
                     value={r.weight}
                     onChange={(e) => updateRow(i, { weight: e.target.value })}
                     placeholder="1"
+                    aria-label={`Weight, row ${i + 1}`}
                   />
                 </td>
                 <td>
@@ -158,6 +161,7 @@ export default function Evaluate() {
                     type="button"
                     className="btn-danger"
                     onClick={() => removeRow(i)}
+                    aria-label={`Remove row ${i + 1}`}
                     disabled={rows.length <= 1}
                   >
                     Remove
@@ -229,7 +233,7 @@ export default function Evaluate() {
             </div>
             {evalResult.samples && evalResult.samples.length ? (
               <div className="field">
-                <label>Samples</label>
+                <span className="field-label">Samples</span>
                 <pre className="cell-output">
                   {JSON.stringify(evalResult.samples, null, 2)}
                 </pre>
@@ -304,7 +308,7 @@ export default function Evaluate() {
             </div>
             {comparison.sample_diffs && comparison.sample_diffs.length ? (
               <div className="field">
-                <label>Sample diffs</label>
+                <span className="field-label">Sample diffs</span>
                 <pre className="cell-output">
                   {JSON.stringify(comparison.sample_diffs, null, 2)}
                 </pre>

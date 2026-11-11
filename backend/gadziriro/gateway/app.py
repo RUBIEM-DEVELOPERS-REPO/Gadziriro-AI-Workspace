@@ -19,10 +19,13 @@ from typing import Optional
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from nacl.signing import SigningKey
 
+from ..access.dataset_acl import DatasetAclStore
 from ..audit.base import AuditSink
 from ..audit.log import AuditLog
 from ..auth.store import SqlUserStore
+from ..compliance.dpia import DpiaService
 from ..core.config import Settings, load_settings
 from ..core.errors import AuthError, GadziriroError, NotFound, PolicyDenied
 from ..core.objectstore import LocalObjectStore, ObjectStore
@@ -38,6 +41,7 @@ from ..scheduler.base import Quota, QuotaExceeded
 from ..scheduler.queue import Scheduler
 from ..sessions.manager import SessionManager
 from ..tracking.store import ObjectStoreTracker
+from ..updates.apply import UpdateManager
 from . import routes  # noqa: F401 - import registers every route module's router
 from .ratelimit import TokenBucketMiddleware
 from .registry import registered_routers
@@ -116,6 +120,18 @@ def create_app(
     # Phase 2: a single in-memory incident-response service shared across requests.
     incident_service = incident_service or IncidentService(audit=audit)
 
+    # Phase 3: singletons shared across requests. The update verify key is a
+    # throwaway dev key generated per process; production replaces
+    # ``app.state.update_manager`` with one holding the customer's real verify
+    # key. ``app.state.update_dev_signing_key`` lets dev/tests mint bundles this
+    # manager accepts.
+    dpia_service = DpiaService()
+    dataset_acl_store = DatasetAclStore()
+    dev_signing_key = SigningKey.generate()
+    update_manager = UpdateManager(
+        verify_key=dev_signing_key.verify_key, current_version="0.1.0", audit=audit
+    )
+
     app = FastAPI(title="Gadziriro AI Workspace", version="0.1.0")
     app.state.settings = settings
     app.state.audit = audit
@@ -130,6 +146,10 @@ def create_app(
     app.state.metrics = metrics
     app.state.export_policy = export_policy
     app.state.incident_service = incident_service
+    app.state.dpia_service = dpia_service
+    app.state.dataset_acl_store = dataset_acl_store
+    app.state.update_manager = update_manager
+    app.state.update_dev_signing_key = dev_signing_key  # dev only; see above
 
     app.add_middleware(
         CORSMiddleware,

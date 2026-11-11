@@ -173,3 +173,18 @@ def get_settings(request: Request) -> Any:
 def get_incident_service(request: Request) -> Any:
     """Return the Phase 2 incident-response service wired onto ``app.state``."""
     return request.app.state.incident_service
+
+
+def get_update_manager(request: Request) -> Any:
+    """Return the Phase 3 signed-update manager wired onto ``app.state``."""
+    return request.app.state.update_manager
+
+
+def get_dataset_acl_store(request: Request) -> Any:
+    """Return the Phase 3 per-dataset ACL store wired onto ``app.state``."""
+    return request.app.state.dataset_acl_store
+
+
+def get_dpia_service(request: Request) -> Any:
+    """Return the Phase 3 DPIA service wired onto ``app.state``."""
+    return request.app.state.dpia_service

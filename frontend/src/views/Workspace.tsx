@@ -120,7 +120,7 @@ export default function Workspace() {
         ) : null}
 
         {loading ? (
-          <p className="muted">Loading sessions…</p>
+          <p className="muted" role="status">Loading sessions…</p>
         ) : sessions.length === 0 ? (
           <p className="muted">No sessions yet. Create one to get started.</p>
         ) : (

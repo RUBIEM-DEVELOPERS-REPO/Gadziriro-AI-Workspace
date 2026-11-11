@@ -28,6 +28,8 @@ import json
 from pathlib import Path
 from typing import Optional, Sequence
 
+from ..audit.log import AuditLog
+from ..compliance.ropa import build_ropa
 from ..core.config import Settings, load_settings
 from ..core.objectstore import LocalObjectStore
 from ..gateway.app import app
@@ -36,6 +38,7 @@ from ..installer.hwcheck import check_hardware
 from ..modelcards.card import build_model_card, render_markdown
 from ..policy.packs import describe_precedence, merge_packs
 from ..registry.store import ObjectStoreRegistry
+from ..reporting.egress_report import build_egress_report, render_text
 from .audit_cmd import verify_cmd
 
 
@@ -164,6 +167,31 @@ def _cmd_incidents(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_egress_report(args: argparse.Namespace) -> int:
+    """Print the "what left this machine" report from the audit log (FR-25)."""
+    settings = _settings_for(args)
+    audit = AuditLog(path=settings.audit_dir / "audit.jsonl")
+    print(render_text(build_egress_report(audit)))
+    return 0
+
+
+def _cmd_ropa(args: argparse.Namespace) -> int:
+    """Build and print the ROPA register of personal-data processing (FR-46)."""
+    settings = _settings_for(args)
+    store = LocalObjectStore(settings.data_dir / "objectstore")
+    activities = build_ropa(ObjectStoreRegistry(store), store)
+    print("Gadziriro ROPA (GDPR Art. 30)")
+    print("=============================")
+    if not activities:
+        print("No personal-data processing activities.")
+    for a in activities:
+        print(
+            f"{a.dataset_ref}: {a.purpose} | {', '.join(a.data_categories)} "
+            f"| basis={a.lawful_basis} | source={a.source} | {a.sensitivity}"
+        )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Construct the top-level argument parser and its subcommands."""
     parser = argparse.ArgumentParser(
@@ -234,6 +262,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--data-dir", default=None, help="Workspace data dir (default: settings)."
     )
     incidents.set_defaults(func=_cmd_incidents)
+
+    for name, handler, text in (
+        ("egress-report", _cmd_egress_report, "Print the egress report (FR-25)."),
+        ("ropa", _cmd_ropa, "Print the ROPA register (FR-46)."),
+    ):
+        sub = subparsers.add_parser(name, help=text)
+        sub.add_argument(
+            "--data-dir", default=None, help="Workspace data dir (default: settings)."
+        )
+        sub.set_defaults(func=handler)
 
     return parser
 
