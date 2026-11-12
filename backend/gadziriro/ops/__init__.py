@@ -9,5 +9,6 @@ dependency (stdlib ``tarfile``/``hashlib`` only).
 from __future__ import annotations
 
 from .backup import BackupManifest, BackupService
+from .sbom import build_sbom, write_sbom
 
-__all__ = ["BackupManifest", "BackupService"]
+__all__ = ["BackupManifest", "BackupService", "build_sbom", "write_sbom"]

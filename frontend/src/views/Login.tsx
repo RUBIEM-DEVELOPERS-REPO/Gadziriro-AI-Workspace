@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useT } from '../i18n/index.ts'
 import { api, ApiError, type PrincipalOut } from '../api/client.ts'
 
 interface Props {
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export default function Login({ onLoggedIn }: Props) {
+  const { t } = useT()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -22,9 +24,9 @@ export default function Login({ onLoggedIn }: Props) {
       onLoggedIn(principal)
     } catch (err) {
       if (err instanceof ApiError) {
-        setError(err.status === 401 ? 'Invalid username or password.' : err.message)
+        setError(err.status === 401 ? t('login.invalid') : err.message)
       } else {
-        setError('Could not reach the gateway.')
+        setError(t('login.unreachable'))
       }
     } finally {
       setBusy(false)
@@ -34,10 +36,10 @@ export default function Login({ onLoggedIn }: Props) {
   return (
     <div className="login-card">
       <h1 className="login-title">Gadziriro AI Workspace</h1>
-      <p className="muted">Sign in to your private, sealed workspace.</p>
+      <p className="muted">{t('login.subtitle')}</p>
       <form onSubmit={handleSubmit} className="form">
         <div className="field">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">{t('login.username')}</label>
           <input
             id="username"
             name="username"
@@ -49,7 +51,7 @@ export default function Login({ onLoggedIn }: Props) {
           />
         </div>
         <div className="field">
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{t('login.password')}</label>
           <input
             id="password"
             name="password"
@@ -66,7 +68,7 @@ export default function Login({ onLoggedIn }: Props) {
           </p>
         ) : null}
         <button type="submit" className="btn-primary" disabled={busy}>
-          {busy ? 'Signing in…' : 'Sign in'}
+          {busy ? t('common.signingIn') : t('common.login')}
         </button>
       </form>
     </div>
