@@ -65,6 +65,8 @@ def _login(client: TestClient, username: str, password: str) -> None:
 
 
 def _signed_plugin(client: TestClient, name: str, kind: str, *, key=None) -> dict:
+    import json
+
     key = key or client.app.state.plugin_dev_signing_key
     manifest = {
         "name": name,
@@ -74,11 +76,12 @@ def _signed_plugin(client: TestClient, name: str, kind: str, *, key=None) -> dic
         "api_version": "1",
     }
     bundle = sign_plugin(manifest, b"plugin-payload", key)
-    return {
+    inner = {
         "manifest": bundle.manifest,
         "payload_b64": base64.b64encode(bundle.payload).decode(),
         "sig": bundle.sig,
     }
+    return {"bundle_b64": base64.b64encode(json.dumps(inner).encode()).decode()}
 
 
 def test_plugin_install_enable(client: TestClient) -> None:

@@ -25,11 +25,17 @@ _require_admin = require_role(Role.ADMIN)
 
 
 class PluginInstallIn(BaseModel):
-    """A signed plug-in bundle: manifest + base64 payload + base64 signature."""
+    """A signed plug-in bundle.
 
-    manifest: dict[str, Any]
+    Accepts either ``bundle_b64`` — base64 of a JSON ``{manifest, payload_b64, sig}``
+    (the single-string form the UI pastes, mirroring signed updates) — or the three
+    fields inline. ``bundle_b64`` wins when present.
+    """
+
+    bundle_b64: str = ""
+    manifest: dict[str, Any] = Field(default_factory=dict)
     payload_b64: str = ""
-    sig: str = Field(..., description="base64 Ed25519 signature over the manifest")
+    sig: str = ""
 
 
 def _record_out(rec: Any) -> dict[str, Any]:
@@ -64,11 +70,22 @@ def install_plugin(
     _: Annotated[Principal, Depends(_require_admin)],
 ) -> dict[str, Any]:
     """Install a signed plug-in; an unsigned/tampered bundle is refused (400)."""
+    manifest_dict, payload_b64, sig = body.manifest, body.payload_b64, body.sig
+    if body.bundle_b64:
+        try:
+            import json
+
+            decoded = json.loads(base64.b64decode(body.bundle_b64).decode("utf-8"))
+        except (ValueError, TypeError, UnicodeDecodeError) as exc:
+            raise GadziriroError("bundle_b64 is not valid base64 JSON") from exc
+        manifest_dict = decoded.get("manifest", {})
+        payload_b64 = decoded.get("payload_b64", "")
+        sig = decoded.get("sig", "")
     try:
-        payload = base64.b64decode(body.payload_b64) if body.payload_b64 else b""
+        payload = base64.b64decode(payload_b64) if payload_b64 else b""
     except (ValueError, TypeError) as exc:
         raise GadziriroError("payload_b64 is not valid base64") from exc
-    bundle = PluginBundle(manifest=body.manifest, payload=payload, sig=body.sig)
+    bundle = PluginBundle(manifest=manifest_dict, payload=payload, sig=sig)
     manifest = reg.install(bundle)
     return {"name": manifest.name, "installed": True, "enabled": False}
 

@@ -39,13 +39,14 @@ def main() -> int:
         "api_version": "1",
     }
     pb = sign_plugin(manifest, b"demo plugin payload", _key("plugin"))
-    install = {
+    inner = {
         "manifest": pb.manifest,
         "payload_b64": base64.b64encode(pb.payload).decode(),
         "sig": pb.sig,
     }
-    print("=== PLUGINS tab: POST /api/plugins/install body ===")
-    print(json.dumps(install))
+    plugin_b64 = base64.b64encode(json.dumps(inner).encode("utf-8")).decode()
+    print("=== PLUGINS tab: paste this base64 into 'Signed plug-in bundle' ===")
+    print(plugin_b64)
     return 0
 
 
