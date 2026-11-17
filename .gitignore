@@ -21,3 +21,5 @@ frontend/dist/
 .idea/
 .vscode/
 *.log
+.run/
+backend/.run/
