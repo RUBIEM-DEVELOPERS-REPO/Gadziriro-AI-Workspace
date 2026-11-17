@@ -397,6 +397,20 @@
         "title": "EvalRunIn",
         "type": "object"
       },
+      "EvidenceExportIn": {
+        "description": "Which compliance packs are active for this evidence export.",
+        "properties": {
+          "enabled_packs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Enabled Packs",
+            "type": "array"
+          }
+        },
+        "title": "EvidenceExportIn",
+        "type": "object"
+      },
       "ExportIn": {
         "description": "Body for exporting a registered model (FR-15).",
         "properties": {
@@ -717,6 +731,32 @@
           "title"
         ],
         "title": "OpenIncidentIn",
+        "type": "object"
+      },
+      "PluginInstallIn": {
+        "description": "A signed plug-in bundle: manifest + base64 payload + base64 signature.",
+        "properties": {
+          "manifest": {
+            "additionalProperties": true,
+            "title": "Manifest",
+            "type": "object"
+          },
+          "payload_b64": {
+            "default": "",
+            "title": "Payload B64",
+            "type": "string"
+          },
+          "sig": {
+            "description": "base64 Ed25519 signature over the manifest",
+            "title": "Sig",
+            "type": "string"
+          }
+        },
+        "required": [
+          "manifest",
+          "sig"
+        ],
+        "title": "PluginInstallIn",
         "type": "object"
       },
       "PrincipalOut": {
@@ -1970,6 +2010,77 @@
         ]
       }
     },
+    "/api/evidence": {
+      "get": {
+        "description": "List prior evidence packs (newest first).",
+        "operationId": "list_evidence_api_evidence_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Evidence Api Evidence Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Evidence",
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
+    "/api/evidence/export": {
+      "post": {
+        "description": "Assemble and store an auditor evidence pack; return its manifest.",
+        "operationId": "export_evidence_api_evidence_export_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvidenceExportIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Export Evidence Api Evidence Export Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Evidence",
+        "tags": [
+          "evidence"
+        ]
+      }
+    },
     "/api/exports": {
       "get": {
         "description": "List every export request.",
@@ -3159,6 +3270,167 @@
         "summary": "Templates",
         "tags": [
           "modelstudio"
+        ]
+      }
+    },
+    "/api/plugins": {
+      "get": {
+        "description": "List installed plug-ins.",
+        "operationId": "list_plugins_api_plugins_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Plugins Api Plugins Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Plugins",
+        "tags": [
+          "plugins"
+        ]
+      }
+    },
+    "/api/plugins/install": {
+      "post": {
+        "description": "Install a signed plug-in; an unsigned/tampered bundle is refused (400).",
+        "operationId": "install_plugin_api_plugins_install_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PluginInstallIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Install Plugin Api Plugins Install Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Install Plugin",
+        "tags": [
+          "plugins"
+        ]
+      }
+    },
+    "/api/plugins/{name}/disable": {
+      "post": {
+        "description": "Disable an installed plug-in.",
+        "operationId": "disable_plugin_api_plugins__name__disable_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Disable Plugin Api Plugins  Name  Disable Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Disable Plugin",
+        "tags": [
+          "plugins"
+        ]
+      }
+    },
+    "/api/plugins/{name}/enable": {
+      "post": {
+        "description": "Enable an installed plug-in.",
+        "operationId": "enable_plugin_api_plugins__name__enable_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "title": "Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Enable Plugin Api Plugins  Name  Enable Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Enable Plugin",
+        "tags": [
+          "plugins"
         ]
       }
     },

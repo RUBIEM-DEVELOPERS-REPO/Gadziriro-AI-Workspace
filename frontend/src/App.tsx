@@ -16,6 +16,9 @@ import Compliance from './views/Compliance.tsx'
 import Updates from './views/Updates.tsx'
 import Enterprise from './views/Enterprise.tsx'
 import Safety from './views/Safety.tsx'
+import Plugins from './views/Plugins.tsx'
+import Evidence from './views/Evidence.tsx'
+import { LANGS, useT, type Lang } from './i18n/index.ts'
 
 type Tab =
   | 'workspace'
@@ -31,10 +34,13 @@ type Tab =
   | 'safety'
   | 'enterprise'
   | 'updates'
+  | 'plugins'
+  | 'evidence'
   | 'ops'
   | 'admin'
 
 export default function App() {
+  const { t, lang, setLang } = useT()
   const [principal, setPrincipal] = useState<PrincipalOut | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('workspace')
@@ -75,7 +81,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="app-shell">
-        <p className="muted" role="status">Loading…</p>
+        <p className="muted" role="status">{t('common.loading')}</p>
       </div>
     )
   }
@@ -111,6 +117,8 @@ export default function App() {
     { id: 'safety', label: 'Safety', visible: canSafety },
     { id: 'enterprise', label: 'Enterprise', visible: isAdmin },
     { id: 'updates', label: 'Updates', visible: isAdmin },
+    { id: 'plugins', label: 'Plugins', visible: isAdmin },
+    { id: 'evidence', label: 'Evidence', visible: isAdmin },
     { id: 'ops', label: 'Ops', visible: isAdmin },
     { id: 'admin', label: 'Admin', visible: true },
   ]
@@ -135,31 +143,31 @@ export default function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">
-        Skip to main content
+        {t('nav.skip')}
       </a>
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark">Gadziriro</span>
           <span className="brand-sub">AI Workspace</span>
         </div>
-        <div className="tabs" role="tablist" aria-label="Main navigation">
-          {visibleTabs.map((t, i) => (
+        <div className="tabs" role="tablist" aria-label={t('nav.aria')}>
+          {visibleTabs.map((tb, i) => (
             <button
-              key={t.id}
-              id={`tab-${t.id}`}
+              key={tb.id}
+              id={`tab-${tb.id}`}
               ref={(el) => {
-                tabRefs.current[t.id] = el
+                tabRefs.current[tb.id] = el
               }}
               type="button"
               role="tab"
-              className={tab === t.id ? 'tab active' : 'tab'}
-              aria-selected={tab === t.id}
+              className={tab === tb.id ? 'tab active' : 'tab'}
+              aria-selected={tab === tb.id}
               aria-controls="main-content"
-              tabIndex={tab === t.id ? 0 : -1}
-              onClick={() => setTab(t.id)}
+              tabIndex={tab === tb.id ? 0 : -1}
+              onClick={() => setTab(tb.id)}
               onKeyDown={(e) => onTabKeyDown(e, i)}
             >
-              {t.label}
+              {t(`nav.${tb.id}`, tb.label)}
             </button>
           ))}
         </div>
@@ -168,8 +176,22 @@ export default function App() {
             {principal.username}
             {isAdmin ? <span className="role-pill">admin</span> : null}
           </span>
+          <label htmlFor="lang-select" className="lang-label">
+            {t('common.language')}
+          </label>
+          <select
+            id="lang-select"
+            value={lang}
+            onChange={(e) => setLang(e.target.value as Lang)}
+          >
+            {LANGS.map((l) => (
+              <option key={l.code} value={l.code} lang={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
           <button type="button" className="btn-secondary" onClick={handleLogout}>
-            Logout
+            {t('common.logout')}
           </button>
         </div>
       </header>
@@ -207,6 +229,10 @@ export default function App() {
           <Enterprise />
         ) : tab === 'updates' && isAdmin ? (
           <Updates />
+        ) : tab === 'plugins' && isAdmin ? (
+          <Plugins />
+        ) : tab === 'evidence' && isAdmin ? (
+          <Evidence />
         ) : tab === 'ops' && isAdmin ? (
           <Ops />
         ) : tab === 'admin' ? (

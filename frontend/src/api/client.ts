@@ -244,6 +244,31 @@ export interface Dpia {
   [key: string]: unknown
 }
 
+// --- Phase 4: plug-ins and evidence packs ---------------------------------
+
+export interface PluginInfo {
+  name: string
+  kind?: string
+  version?: string
+  enabled?: boolean
+  [key: string]: unknown
+}
+
+export interface EvidenceExportOut {
+  pack_key: string
+  audit_ok?: boolean
+  generated_at?: string
+  sections?: string[]
+}
+
+export interface EvidenceManifest {
+  pack_key?: string
+  generated_at?: string
+  audit_ok?: boolean
+  sections?: string[]
+  [key: string]: unknown
+}
+
 export class ApiError extends Error {
   status: number
   constructor(status: number, message: string) {
@@ -730,5 +755,38 @@ export const api = {
       `/api/compliance/dpia/${encodeURIComponent(id)}/status`,
       { method: 'POST', body: JSON.stringify({ status }) },
     )
+  },
+
+  // --- Phase 4: plug-ins (admin) -------------------------------------------
+  listPlugins(): Promise<PluginInfo[]> {
+    return request<PluginInfo[]>('/api/plugins')
+  },
+
+  installPlugin(bundleB64: string): Promise<unknown> {
+    return request<unknown>('/api/plugins/install', {
+      method: 'POST',
+      body: JSON.stringify({ bundle_b64: bundleB64 }),
+    })
+  },
+
+  enablePlugin(name: string): Promise<unknown> {
+    return request<unknown>(`/api/plugins/${encodeURIComponent(name)}/enable`, {
+      method: 'POST',
+    })
+  },
+
+  disablePlugin(name: string): Promise<unknown> {
+    return request<unknown>(`/api/plugins/${encodeURIComponent(name)}/disable`, {
+      method: 'POST',
+    })
+  },
+
+  // --- Phase 4: evidence packs (admin) -------------------------------------
+  exportEvidence(): Promise<EvidenceExportOut> {
+    return request<EvidenceExportOut>('/api/evidence/export', { method: 'POST' })
+  },
+
+  listEvidence(): Promise<EvidenceManifest[]> {
+    return request<EvidenceManifest[]>('/api/evidence')
   },
 }

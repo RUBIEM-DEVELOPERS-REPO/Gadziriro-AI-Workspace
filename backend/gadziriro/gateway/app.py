@@ -34,6 +34,7 @@ from ..licence.key import LicenceError
 from ..mirror.store import ObjectStoreMirror
 from ..observability.metrics import MetricsRegistry
 from ..ops.backup import BackupService
+from ..plugins.kit import PluginRegistry
 from ..policy.exports import ExportPolicy
 from ..registry.store import ObjectStoreRegistry
 from ..runtime.factory import get_runtime_adapter
@@ -47,6 +48,24 @@ from .ratelimit import TokenBucketMiddleware
 from .registry import registered_routers
 
 VITE_DEV_ORIGIN = "http://localhost:5173"
+
+
+def _dev_signing_key(purpose: str) -> SigningKey:
+    """Ed25519 dev signing key for signed updates / plug-ins.
+
+    Production ships the customer's trusted publisher *verify* key and never holds
+    the signing key. For local testing, setting ``GADZIRIRO_DEV_SIGNING_SEED``
+    derives a stable keypair (so an operator can mint bundles the running server
+    accepts); unset, a throwaway key is generated per process.
+    """
+    import hashlib
+    import os
+
+    seed = os.environ.get("GADZIRIRO_DEV_SIGNING_SEED")
+    if seed:
+        material = hashlib.sha256(f"{seed}:{purpose}".encode("utf-8")).digest()
+        return SigningKey(material)
+    return SigningKey.generate()
 
 
 def _install_exception_handlers(app: FastAPI) -> None:
@@ -127,10 +146,14 @@ def create_app(
     # manager accepts.
     dpia_service = DpiaService()
     dataset_acl_store = DatasetAclStore()
-    dev_signing_key = SigningKey.generate()
+    dev_signing_key = _dev_signing_key("update")
     update_manager = UpdateManager(
         verify_key=dev_signing_key.verify_key, current_version="0.1.0", audit=audit
     )
+    # Phase 4 plug-in kit. In production the verify key is the customer's trusted
+    # publisher key; the dev signing key below lets dev/tests mint signed bundles.
+    plugin_dev_key = _dev_signing_key("plugin")
+    plugin_registry = PluginRegistry(verify_key=plugin_dev_key.verify_key, audit=audit)
 
     app = FastAPI(title="Gadziriro AI Workspace", version="0.1.0")
     app.state.settings = settings
@@ -150,6 +173,8 @@ def create_app(
     app.state.dataset_acl_store = dataset_acl_store
     app.state.update_manager = update_manager
     app.state.update_dev_signing_key = dev_signing_key  # dev only; see above
+    app.state.plugin_registry = plugin_registry
+    app.state.plugin_dev_signing_key = plugin_dev_key  # dev only; see above
 
     app.add_middleware(
         CORSMiddleware,

@@ -188,3 +188,8 @@ def get_dataset_acl_store(request: Request) -> Any:
 def get_dpia_service(request: Request) -> Any:
     """Return the Phase 3 DPIA service wired onto ``app.state``."""
     return request.app.state.dpia_service
+
+
+def get_plugin_registry(request: Request) -> Any:
+    """Return the Phase 4 plug-in registry wired onto ``app.state``."""
+    return request.app.state.plugin_registry
